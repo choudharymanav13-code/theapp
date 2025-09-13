@@ -1,7 +1,7 @@
 
 'use client'
 import { useState } from 'react'
-import { supabase } from '@/src/lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 function daysFromNow(d){ const dt=new Date(); dt.setDate(dt.getDate()+d); const y=dt.getFullYear(), m=('0'+(dt.getMonth()+1)).slice(-2), da=('0'+dt.getDate()).slice(-2); return `${y}-${m}-${da}` }
 function shelfLifeDaysFor(name){
   if(!name) return null
