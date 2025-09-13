@@ -1,7 +1,7 @@
 
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/src/lib/supabaseClient'
+import { supabase } from '../lib/supabaseClient'
 function toast(msg){
   const t = document.createElement('div')
   t.textContent = msg
