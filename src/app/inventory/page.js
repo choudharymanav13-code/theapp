@@ -1,7 +1,7 @@
 // src/app/inventory/page.js
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/src/lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Inventory() {
   const [items, setItems] = useState([]);
