@@ -95,9 +95,9 @@ export default function Home() {
             <div className="space" />
 
             <div className="grid grid-3">
-              /add-item+ Add Item</a>
-              /log-meal+ Log Meal</a>
-              /recipesView Recipes</a>
+              <a href="/add-item">+ Add Item</a>
+              <a href="/log-meal">+ Log Meal</a>
+              <a href="/recipes">View Recipes</a>
             </div>
 
             <div className="space" />
