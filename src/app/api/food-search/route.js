@@ -1,20 +1,23 @@
 // src/app/api/food-search/route.js
 import { NextResponse } from 'next/server';
 
-// Force Node.js runtime (lets us use regular fetch semantics)
-// and prevent any ISR/cache from persisting results.
+// Ensure no framework-level caching of this handler
 export const runtime = 'nodejs';
-export const revalidate = 0;          // Next.js: no ISR
-export const dynamic = 'force-dynamic'; // ensure per-request run
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/food-search?q=paneer
- * Returns: { products: [{ name, brand, kcal_100g, protein_100g, carbs_100g, fat_100g, code }], error? }
+ * Returns: {
+ *   query: { raw, normalized },
+ *   source: 'v2' | 'v1' | 'none',
+ *   products: [{ name, brand, kcal_100g, protein_100g, carbs_100g, fat_100g, code }],
+ *   error?
+ * }
+ *
  * Notes:
- * - Handles Indian synonyms (dahi->yogurt, poha->flattened rice, roti->chapati, etc.)
- * - Uses v2 search first, v1 as fallback
- * - Keeps a result if it has ANY nutrient (not all)
- * - Adds nocache=1 (OFF notes: search is cached) and prefers English labels
+ * - OFF search can be cached; use `nocache=1` for fresh results (per OFF docs). 
+ * - v2 first, v1 fallback; keep results that have ANY nutrient.
  */
 const SYNONYMS = [
   [/^dahi$/i, 'yogurt'],
@@ -50,29 +53,32 @@ function normalizeQuery(q) {
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const qRaw = (searchParams.get('q') ?? '').trim();
-  if (!qRaw || qRaw.length < 2) return NextResponse.json({ products: [] });
+  if (!qRaw || qRaw.length < 2) {
+    const res = NextResponse.json({ query: { raw: qRaw, normalized: '' }, source: 'none', products: [] });
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
+  }
 
   const q = normalizeQuery(qRaw);
 
-  // OFF strongly recommends sending a User-Agent, but in some runtimes
-  // setting it throws. We omit it for stability, and can re-add once confirmed.
+  // Minimal headers (some hosts disallow setting User-Agent programmatically)
   const headers = { Accept: 'application/json' };
 
   const fields = 'code,product_name,brands,nutriments,languages_tags,countries_tags';
   const size = 24;
 
-  // Prefer v2 (lighter, field selection), with English label preference & nocache
   const v2Url =
     `https://world.openfoodfacts.org/api/v2/search` +
     `?fields=${encodeURIComponent(fields)}` +
     `&page_size=${size}` +
     `&sort_by=popularity_key` +
     `&search_terms=${encodeURIComponent(q)}` +
-    `&lc=en` +              // prefer English
-    `&nocache=1`;           // OFF: search is cached → request fresh
+    `&lc=en` +
+    `&nocache=1`;
 
+  let source = 'none';
   try {
-    // v2
+    // v2 first
     let resp = await fetch(v2Url, { headers, cache: 'no-store' });
     let data = await resp.json();
     let arr = Array.isArray(data?.products) ? data.products : [];
@@ -92,6 +98,9 @@ export async function GET(req) {
       resp = await fetch(v1Url, { headers, cache: 'no-store' });
       data = await resp.json();
       arr = Array.isArray(data?.products) ? data.products : [];
+      source = arr.length ? 'v1' : 'none';
+    } else {
+      source = 'v2';
     }
 
     const out = arr
@@ -111,7 +120,6 @@ export async function GET(req) {
           fat_100g: n['fat_100g'] != null ? Number(n['fat_100g']) : null,
         };
       })
-      // RELAXED: keep if any nutrient present (else users think search is "broken")
       .filter(
         (x) =>
           x.kcal_100g != null ||
@@ -120,12 +128,19 @@ export async function GET(req) {
           x.fat_100g != null
       );
 
-    return NextResponse.json({ products: out });
+    // Log to Vercel function logs so we can see what the server did
+    console.log('[food-search]', { qRaw, q, count: out.length, source });
+
+    const res = NextResponse.json({ query: { raw: qRaw, normalized: q }, source, products: out });
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
   } catch (err) {
-    // Surface the error to the UI so we can SEE it while testing.
-    return NextResponse.json(
-      { products: [], error: String(err?.message || err || 'Search failed') },
+    console.error('[food-search:ERROR]', qRaw, err);
+    const res = NextResponse.json(
+      { query: { raw: qRaw, normalized: q }, source, products: [], error: String(err?.message || err) },
       { status: 200 }
     );
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
   }
 }
