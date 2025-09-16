@@ -1,7 +1,7 @@
 // src/app/api/food-search/route.js
 import { NextResponse } from 'next/server';
-import { CATEGORIES, searchFallbackFoods } from '../../../data/fallbackFoods';
 
+// Deduplicate by name+brand
 function uniqueByNameBrand(list) {
   const seen = new Set();
   const out = [];
@@ -12,27 +12,48 @@ function uniqueByNameBrand(list) {
   return out;
 }
 
+async function loadFallbackModule() {
+  // Try both canonical locations; if both fail, return empty fallbacks gracefully.
+  try {
+    // Preferred: src/data/fallbackFoods.js  (3 ups from this file)
+    return await import('../../../data/fallbackFoods.js');
+  } catch {
+    try {
+      // Alternate: src/app/data/fallbackFoods.js  (2 ups)
+      return await import('../../data/fallbackFoods.js');
+    } catch {
+      console.error('[food-search] fallbackFoods module not found in either path.');
+      return {
+        CATEGORIES: ['Staples','Oils','Vegetables','Fruits','Grains & Pulses','Dairy'],
+        searchFallbackFoods: () => []
+      };
+    }
+  }
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get('q') || '').trim();
   const category = (searchParams.get('category') || 'All').trim();
   const size = Number(searchParams.get('size') || 20);
 
-  // Always offer some fallback if category is selected and query empty
-  const fallbackFirst = searchFallbackFoods(q, category, size);
+  const { CATEGORIES, searchFallbackFoods } = await loadFallbackModule();
 
-  // If no query at all and we have a category, we can return fallback immediately
-  // (still append OFF if it yields relevant results)
+  // Always compute some fallback suggestions (esp. for category tabs)
+  const fallbackList = searchFallbackFoods(q, category, size);
+
+  // OFF search (only if we have a meaningful query)
   let offResults = [];
-
   if (q.length >= 2) {
     const headers = {
-      // Recommended by OFF to avoid accidental blocking.
-      // Replace with your live URL
-      'User-Agent': 'PantryCoach/1.0 (+https://your-app.vercel.app)',
+      // Use your actual Vercel URL to be a good citizen with OFF
+      'User-Agent': 'PantryCoach/1.0 (+https://YOUR-VERCEL-URL.vercel.app)',
+      'Accept': 'application/json'
     };
 
     const fields = 'code,product_name,brands,nutriments';
+
+    // Try v2 first
     const v2Url =
       `https://world.openfoodfacts.org/api/v2/search` +
       `?fields=${encodeURIComponent(fields)}` +
@@ -46,20 +67,24 @@ export async function GET(req) {
       let data = await resp.json();
       let arr = Array.isArray(data?.products) ? data.products : [];
 
-      if (!arr.length) {
+      // If v2 returns little or nothing, try v1 with looser matching and India bias
+      if (!arr.length || arr.length < 5) {
         const v1Url =
           `https://world.openfoodfacts.org/cgi/search.pl` +
           `?action=process&json=1` +
-          `&fields=${encodeURIComponent(fields)}` +
-          `&page_size=${size}` +
           `&search_terms=${encodeURIComponent(q)}` +
+          `&search_simple=1` +                        // looser matching
+          `&countries_tags_en=india` +                // improve relevance for India
+          `&page_size=${size}` +
+          `&fields=${encodeURIComponent(fields)}` +
           `&nocache=1`;
         resp = await fetch(v1Url, { headers, cache: 'no-store' });
         data = await resp.json();
-        arr = Array.isArray(data?.products) ? data.products : [];
+        arr = Array.isArray(data?.products) ? data.products : arr;
       }
 
-      offResults = arr.map(p => {
+      // Map to clean shape
+      const mapped = arr.map(p => {
         const n = p.nutriments || {};
         let kcal = n['energy-kcal_100g'];
         if (kcal == null && n['energy_100g'] != null) {
@@ -75,33 +100,32 @@ export async function GET(req) {
           fat_100g: n['fat_100g'] != null ? Number(n['fat_100g']) : null,
           source: 'off',
         };
-      })
-      // keep items that have at least kcal or any macro
-      .filter(x =>
+      });
+
+      // Keep items with macros; if too few remain, relax and keep all mapped
+      let kept = mapped.filter(x =>
         x.kcal_100g != null ||
         x.protein_100g != null ||
         x.carbs_100g != null ||
         x.fat_100g != null
       );
-    } catch {
+      if (kept.length < 5) kept = mapped;
+
+      offResults = kept;
+    } catch (e) {
+      console.error('[food-search] OFF error:', e);
       offResults = [];
     }
   }
 
-  // Merge logic:
-  // 1) If OFF results are strong (>= 5), show OFF first and still append a few fallback that match query/category.
-  // 2) If OFF is weak (< 5), append more fallback to guarantee relevant staples.
+  // Merge: OFF first, then fallback. Deduplicate by name+brand.
   const merged = uniqueByNameBrand([
     ...offResults,
-    ...fallbackFirst,
+    ...fallbackList,
   ]);
 
-  // Optionally cap results
-  const products = merged.slice(0, size);
-
-  // Provide categories to the client so it can render tabs
   return NextResponse.json({
-    products,
+    products: merged.slice(0, size),
     categories: ['All', ...CATEGORIES],
   });
 }
