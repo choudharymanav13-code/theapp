@@ -1,7 +1,7 @@
 // src/app/inventory/page.js
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function Inventory() {
   const [items, setItems] = useState([]);
@@ -35,7 +35,10 @@ export default function Inventory() {
       <div className="content">
         <div className="row" style={{ gap: 8 }}>
           <input className="input" placeholder="Search (e.g., dal, paneer) — coming soon" />
-          <a className="btn primary" href="/add     <div className="space"></div>
+          /add-item+ Add</a>
+        </div>
+
+        <div className="space"></div>
 
         <div className="list">
           {items.map((it) => (
