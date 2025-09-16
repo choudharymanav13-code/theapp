@@ -1,5 +1,6 @@
 // src/app/page.js
 'use client';
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -43,14 +44,28 @@ export default function Home() {
 
   const sendMagicLink = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) toast(error.message); else toast('Check your email for the login link!');
+    // Step C1.2: always redirect back to a stable origin after login
+    const origin =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (typeof window !== 'undefined' ? window.location.origin : '');
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: origin || undefined,
+      },
+    });
+
+    if (error) toast(error.message);
+    else toast('Check your email for the login link!');
   };
 
-  const signOut = async () => { await supabase.auth.signOut(); };
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   const invCount = items.length;
-  const expSoon = items.filter(it => {
+  const expSoon = items.filter((it) => {
     if (!it.expiry_date) return false;
     const d = new Date(it.expiry_date + 'T00:00:00');
     const days = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
@@ -59,8 +74,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="header"><h1>Pantry Coach v0.2</h1></div>
-
+      <div className="header"><h1>Pantry Coach</h1></div>
       <div className="content">
         {!session ? (
           <div className="card" style={{ display: 'grid', gap: 12 }}>
@@ -68,7 +82,6 @@ export default function Home() {
               <div className="val">Welcome 👋</div>
               <div className="small">Login with your email (magic link)</div>
             </div>
-
             <label className="label">Email</label>
             <input
               className="input"
@@ -95,15 +108,20 @@ export default function Home() {
             <div className="space" />
 
             <div className="grid grid-3">
-              <a href="/add-item">+ Add Item</a>
-              <a href="/log-meal">+ Log Meal</a>
-              <a href="/recipes">View Recipes</a>
+              /add-item+ Add Item</a>
+              /log-meal+ Log Meal</a>
+              /recipesView Recipes</a>
             </div>
 
             <div className="space" />
 
-            <button className="btn" onClick={signOut}>Sign out ({session.user.email})</button>
-            <p className="small" style={{ marginTop: 12 }}>Install on iPhone: Share → Add to Home Screen</p>
+            <button className="btn" onClick={signOut}>
+              Sign out ({session.user.email})
+            </button>
+
+            <p className="small" style={{ marginTop: 12 }}>
+              Install on iPhone: Share → Add to Home Screen
+            </p>
           </>
         )}
       </div>
