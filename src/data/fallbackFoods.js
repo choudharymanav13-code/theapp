@@ -1,9 +1,9 @@
 // src/data/fallbackFoods.js
-// Nutrition values are approximate per 100g (or 100ml for milk) for common Indian staples.
-// You can adjust later as you prefer.
+// Nutrition values are approximate per 100g edible portion (milk per 100ml).
+// You can tune these anytime to your preference.
 
 export const CATEGORIES = [
-  'Staples',          // general staples if you don't want to pick a specific sub-category
+  'Staples',
   'Oils',
   'Vegetables',
   'Fruits',
@@ -13,31 +13,21 @@ export const CATEGORIES = [
 
 export const FALLBACK_FOODS = [
   // ---- Oils ----
-  {
-    key: 'oil-sunflower', name: 'Sunflower Oil', category: 'Oils',
+  { key: 'oil-sunflower', name: 'Sunflower Oil', category: 'Oils',
     kcal_100g: 884, protein_100g: 0, carbs_100g: 0, fat_100g: 100,
-    aliases: ['sunflower oil', 'refined oil']
-  },
-  {
-    key: 'oil-mustard', name: 'Mustard Oil (Sarson)', category: 'Oils',
+    aliases: ['sunflower oil', 'refined oil'] },
+  { key: 'oil-mustard', name: 'Mustard Oil (Sarson)', category: 'Oils',
     kcal_100g: 884, protein_100g: 0, carbs_100g: 0, fat_100g: 100,
-    aliases: ['sarson tel', 'mustard oil', 'kachi ghani']
-  },
-  {
-    key: 'oil-groundnut', name: 'Groundnut Oil (Peanut)', category: 'Oils',
+    aliases: ['sarson tel', 'mustard oil', 'kachi ghani'] },
+  { key: 'oil-groundnut', name: 'Groundnut Oil (Peanut)', category: 'Oils',
     kcal_100g: 884, protein_100g: 0, carbs_100g: 0, fat_100g: 100,
-    aliases: ['peanut oil', 'groundnut oil', 'mungfali oil']
-  },
-  {
-    key: 'oil-olive', name: 'Olive Oil', category: 'Oils',
+    aliases: ['groundnut oil', 'peanut oil', 'mungfali oil'] },
+  { key: 'oil-olive', name: 'Olive Oil', category: 'Oils',
     kcal_100g: 884, protein_100g: 0, carbs_100g: 0, fat_100g: 100,
-    aliases: ['extra virgin olive oil', 'olive']
-  },
-  {
-    key: 'ghee', name: 'Ghee', category: 'Oils',
+    aliases: ['extra virgin olive oil', 'olive oil'] },
+  { key: 'ghee', name: 'Ghee', category: 'Oils',
     kcal_100g: 896, protein_100g: 0, carbs_100g: 0, fat_100g: 99.6,
-    aliases: ['desi ghee', 'clarified butter']
-  },
+    aliases: ['desi ghee', 'clarified butter'] },
 
   // ---- Vegetables ----
   { key: 'veg-onion', name: 'Onion', category: 'Vegetables',
@@ -108,8 +98,7 @@ export const FALLBACK_FOODS = [
     aliases: ['milk', 'doodh'] },
 ];
 
-// Simple search over fallback foods.
-// If q is empty and category provided, returns top items in that category.
+// Simple local search with optional category filter.
 export function searchFallbackFoods(q, category, limit = 20) {
   const needle = (q || '').trim().toLowerCase();
   let list = FALLBACK_FOODS;
@@ -118,16 +107,15 @@ export function searchFallbackFoods(q, category, limit = 20) {
     list = list.filter(x => x.category === category);
   }
 
-  let out = list;
   if (needle) {
-    out = list.filter(x => {
+    list = list.filter(x => {
       const inName = x.name.toLowerCase().includes(needle);
       const inAliases = (x.aliases || []).some(a => a.toLowerCase().includes(needle));
       return inName || inAliases;
     });
   }
 
-  return out.slice(0, limit).map(x => ({
+  return list.slice(0, limit).map(x => ({
     code: `fallback:${x.key}`,
     name: x.name,
     brand: '',
