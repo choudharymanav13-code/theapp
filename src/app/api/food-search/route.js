@@ -5,20 +5,7 @@ export const revalidate = 0;
 
 import { NextResponse } from 'next/server';
 
-/**
- * PantryCoach Super Food Search
- *   GET /api/food-search?q=paneer&category=Vegetables&size=20&source=all&strict=0&debug=0
- *
- * Params:
- *   q         : string (>=2 chars to query OFF; empty allowed to show category fallbacks)
- *   category  : "All" | "Staples" | "Oils" | "Vegetables" | "Fruits" | "Grains & Pulses" | "Dairy"
- *   size      : number (1..100, default 20)
- *   source    : "all" | "off" | "fallback"
- *   strict    : "1" → keep only items in selected category (fallback only); if empty, relax to OFF when q present
- *   debug     : "1" → include debug payload with scores and sources used
- */
-
-// ---------- Tiny in-memory cache (per lambda process) ----------
+// ---------- tiny cache ----------
 const MAX_CACHE_ENTRIES = 120;
 const CACHE_TTL_MS = 60_000;
 globalThis.__FOOD_CACHE__ ||= new Map();
@@ -35,8 +22,8 @@ const cacheSet = (k, v) => {
   }
 };
 
-// ---------- Utils ----------
-const UA = process.env.OFF_USER_AGENT || 'PantryCoach/1.0 (+https://your-app.vercel.app)'; // ← set your Vercel URL or use env var
+// ---------- utils ----------
+const UA = process.env.OFF_USER_AGENT || 'PantryCoach/1.0 (+https://your-app.vercel.app)'; // set to your Vercel URL if you like
 const OFF_FIELDS = 'code,product_name,brands,nutriments';
 
 const norm = (s) => (s||'').toString().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
@@ -62,7 +49,7 @@ const scoreItem = (it, q, cat) => {
   return s;
 };
 
-// ---------- Robust loader for staples (tries both locations) ----------
+// ---------- robust loader for staples (tries both) ----------
 async function loadFallbackModule() {
   try { return await import('../../../data/fallbackFoods.js'); }           // src/data/…
   catch {
@@ -105,7 +92,7 @@ function mapOFF(arr) {
   });
 }
 
-// ---------- Handler ----------
+// ---------- handler ----------
 export async function GET(req) {
   const u = new URL(req.url);
   const q = (u.searchParams.get('q')||'').trim();
@@ -164,7 +151,6 @@ export async function GET(req) {
   let filtered = scored;
   if (strict && category && category!=='All') {
     filtered = scored.filter(x => x.source==='fallback' && x.category===category);
-    // if too strict and nothing left, relax to OFF when query provided
     if (!filtered.length && q) filtered = scored.filter(x => x.source==='off');
   }
 
