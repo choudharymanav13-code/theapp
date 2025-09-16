@@ -35,7 +35,7 @@ export default function Inventory() {
       <div className="content">
         <div className="row" style={{ gap: 8 }}>
           <input className="input" placeholder="Search (e.g., dal, paneer) — coming soon" />
-          <add-item+ Add</a>
+          <a href="/add-item" className="btn">+ Add</a>
         </div>
 
         <div className="space"></div>
