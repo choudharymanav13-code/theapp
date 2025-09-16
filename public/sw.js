@@ -1,23 +1,28 @@
 // public/sw.js
-const CACHE = 'pantry-coach-v2';
+const CACHE = 'pantry-coach-v3';
 const ASSETS = ['/', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
+  // Take control immediately
+  self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
 });
 
 self.addEventListener('activate', (e) => {
+  // Become active immediately on all clients and clear old caches
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    (async () => {
+      await self.clients.claim();
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    })()
   );
 });
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Always bypass cache for dynamic calls (API & Supabase)
+  // Never cache API or Supabase calls
   if (url.pathname.startsWith('/api/') || url.hostname.endsWith('.supabase.co')) {
     e.respondWith(fetch(e.request).catch(() => new Response('{"products":[]}', { status: 200 })));
     return;
