@@ -1,7 +1,7 @@
 // src/app/add-item/page.js
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { supabase } from '@/src/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 
 // ---------- Helpers: AI expiry (same logic as Phase 1) ----------
 function daysFromNow(d) {
