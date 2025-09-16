@@ -1,19 +1,14 @@
 // src/app/add-item/page.js
 'use client';
-
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
-/* ------------------------- Helpers: Expiry (AI) ------------------------- */
+// ---------- Helpers: AI expiry (same logic extended a bit) ----------
 function daysFromNow(d) {
-  const dt = new Date();
-  dt.setDate(dt.getDate() + d);
-  const y = dt.getFullYear();
-  const m = String(dt.getMonth() + 1).padStart(2, '0');
-  const da = String(dt.getDate()).padStart(2, '0');
+  const dt = new Date(); dt.setDate(dt.getDate() + d);
+  const y = dt.getFullYear(), m = String(dt.getMonth()+1).padStart(2, '0'), da = String(dt.getDate()).padStart(2, '0');
   return `${y}-${m}-${da}`;
 }
-
 function shelfLifeDaysFor(name) {
   if (!name) return null;
   const n = name.toLowerCase();
@@ -26,12 +21,14 @@ function shelfLifeDaysFor(name) {
     [/egg(s)?\b/, 21],
     [/chicken|fish|mutton|meat/, 2],
     [/cooked|leftover/, 3],
-    [/spinach|palak|greens|cilantro|coriander|mint/, 3],
-    [/tomato|onion|potato/, 14],
-    [/banana|apple|fruit/, 5],
+    [/spinach|palak|greens|cilantro|coriander|mint|leafy/, 3],
+    [/tomato/, 7],
+    [/onion|potato/, 14],
+    [/banana|apple|mango|fruit/, 5],
+    [/okra|bhindi/, 5],
     [/rice|basmati|brown\s*rice/, 365],
     [/atta|flour|maida|rava|suji/, 180],
-    [/dal|lentil|toor|moong|chana|urad/, 365],
+    [/dal|lentil|toor|moong|chana|urad|masoor|pulse/, 365],
     [/sugar|salt/, 365],
     [/oil|ghee/, 365],
     [/spice|masala|turmeric|chilli|cumin|garam/, 540],
@@ -46,80 +43,58 @@ function shelfLifeDaysFor(name) {
   return 30;
 }
 
-/* ------------------------- Small debounce hook ------------------------- */
-function useDebouncedValue(val, ms) {
+function useDebounced(val, ms) {
   const [v, setV] = useState(val);
-  useEffect(() => {
-    const t = setTimeout(() => setV(val), ms);
-    return () => clearTimeout(t);
-  }, [val, ms]);
+  useEffect(() => { const t = setTimeout(() => setV(val), ms); return () => clearTimeout(t); }, [val, ms]);
   return v;
 }
 
-/* ====================================================================== */
-/*                                Component                               */
-/* ====================================================================== */
+// ---------- Component ----------
 export default function AddItem() {
-  // Form fields
+  // Form
   const [name, setName] = useState('');
   const [qty, setQty] = useState('');
   const [unit, setUnit] = useState('g');
-  const [cal, setCal] = useState(''); // kcal/100g or per unit
-  const [protein, setProtein] = useState(''); // g / 100g
+  const [cal, setCal] = useState('');
+  const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [exp, setExp] = useState('');
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
 
-  // Search state
+  // Search
   const [q, setQ] = useState('');
-  const dq = useDebouncedValue(q, 350);
+  const [category, setCategory] = useState('All');
+  const dq = useDebounced(q, 300);
   const [results, setResults] = useState([]);
+  const [cats, setCats] = useState(['All']);
   const [loading, setLoading] = useState(false);
   const [picked, setPicked] = useState(null);
 
-  // NEW: show last API error (Patch 3)
-  const [lastError, setLastError] = useState('');
-
-  // Fetch suggestions when debounced query changes
+  // Fetch when query/category changes
   useEffect(() => {
     let aborted = false;
-
     const run = async () => {
-      const term = dq.trim();
-      if (!term || term.length < 2) {
-        setResults([]);
-        setLastError(''); // clear error when input too short / cleared
-        return;
-      }
       setLoading(true);
       try {
-        const r = await fetch(`/api/food-search?q=${encodeURIComponent(term)}`, {
-          // Make sure we don't cache browser-side either
-          cache: 'no-store',
-          headers: { Accept: 'application/json' },
-        });
+        const url = `/api/food-search?q=${encodeURIComponent(dq)}&category=${encodeURIComponent(category)}&size=20`;
+        const r = await fetch(url, { cache: 'no-store' });
         const j = await r.json();
         if (aborted) return;
-
         setResults(Array.isArray(j?.products) ? j.products : []);
-        setLastError(j?.error ? String(j.error) : '');
-      } catch (e) {
-        if (!aborted) {
-          setResults([]);
-          setLastError(String(e?.message || e));
+        if (Array.isArray(j?.categories) && j.categories.length) {
+          setCats(j.categories);
         }
+      } catch {
+        if (!aborted) setResults([]);
       } finally {
         if (!aborted) setLoading(false);
       }
     };
-
     run();
-    return () => {
-      aborted = true;
-    };
-  }, [dq]);
+    return () => { aborted = true; };
+  }, [dq, category]);
 
   const autoFillExpiry = () => {
     const days = shelfLifeDaysFor(name || picked?.name);
@@ -131,8 +106,7 @@ export default function AddItem() {
     setPicked(p);
     if (p?.name) setName(p.name);
     setBrand(p?.brand || '');
-    setBarcode(p?.code || '');
-
+    setBarcode(p?.code?.startsWith?.('fallback:') ? '' : (p?.code || ''));
     if (p?.kcal_100g != null) setCal(String(p.kcal_100g));
     if (p?.protein_100g != null) setProtein(String(+Number(p.protein_100g).toFixed(1)));
     if (p?.carbs_100g != null) setCarbs(String(+Number(p.carbs_100g).toFixed(1)));
@@ -144,18 +118,13 @@ export default function AddItem() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return alert('You must be signed in.');
 
-    if (!name || !qty || !cal || !exp) {
-      return alert('All required fields must be filled.');
-    }
+    if (!name || !qty || !cal || !exp) return alert('All required fields must be filled.');
 
     const payload = {
       user_id: user.id,
-      name,
-      quantity: Number(qty),
-      unit,
+      name, quantity: Number(qty), unit,
       calories_per_100g: Number(cal),
       expiry_date: exp,
-      // optional new macros
       protein_100g: protein !== '' ? Number(protein) : null,
       carbs_100g: carbs !== '' ? Number(carbs) : null,
       fat_100g: fat !== '' ? Number(fat) : null,
@@ -172,42 +141,56 @@ export default function AddItem() {
     <>
       <div className="header"><h1>Add Item</h1></div>
       <div className="content">
-        {/* --------------------------- Search & autofill --------------------------- */}
+
+        {/* Category Tabs */}
+        <div className="card" style={{padding: 8}}>
+          <div className="row" style={{flexWrap:'wrap', gap:8}}>
+            {cats.map(c => (
+              <button
+                key={c}
+                type="button"
+                className="inline-btn"
+                onClick={() => setCategory(c)}
+                style={{
+                  background: category === c ? '#22c55e' : '#0b1220',
+                  color: category === c ? '#052e16' : '#d4d4d8',
+                  borderColor: category === c ? '#16a34a' : '#334155'
+                }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space"></div>
+
+        {/* Search & results */}
         <div className="card" style={{ display: 'grid', gap: 10 }}>
           <div className="label">Search food (autofill calories & macros)</div>
           <input
             className="input"
-            placeholder="Try: paneer, dal, dosa, oats…"
+            placeholder="Try: paneer, dal, oats, mustard oil, banana…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-
           {loading && <div className="small">Searching…</div>}
-
-          {/* PATCH 3: show the API error clearly */}
-          {!loading && lastError && (
-            <div className="small" style={{ color: '#f87171' }}>
-              Search error: {lastError}
-            </div>
-          )}
-
-          {!loading && !results.length && !lastError && dq && (
-            <div className="small">No results. You can enter values manually.</div>
-          )}
-
           {!!results.length && (
             <div className="list" style={{ marginTop: 4 }}>
               {results.map((r, i) => (
                 <div
-                  key={(r.code || '') + i}
+                  key={`${r.code || r.name || 'x'}-${i}`}
                   className="list-item"
                   style={{ cursor: 'pointer' }}
                   onClick={() => pickResult(r)}
                 >
                   <div>
-                    <div className="item-title">{r.name || 'Unnamed'}</div>
+                    <div className="item-title">
+                      {r.name || 'Unnamed'}
+                      {r.brand ? <span className="badge" style={{ marginLeft: 6 }}>{r.brand}</span> : null}
+                      {r.source === 'fallback' ? <span className="badge" style={{ marginLeft: 6 }}>Staple</span> : null}
+                    </div>
                     <div className="item-sub">
-                      {(r.brand && `${r.brand} • `) || ''}
                       {(r.kcal_100g != null ? `${r.kcal_100g} kcal/100g` : '— kcal')}
                       {` • P ${r.protein_100g ?? '—'}g C ${r.carbs_100g ?? '—'}g F ${r.fat_100g ?? '—'}g`}
                     </div>
@@ -217,36 +200,26 @@ export default function AddItem() {
               ))}
             </div>
           )}
+          {!loading && dq && !results.length && (
+            <div className="small">No results. Try a simpler term, or pick a category tab above.</div>
+          )}
         </div>
 
-        <div className="space" />
+        <div className="space"></div>
 
-        {/* --------------------------------- Form --------------------------------- */}
+        {/* Main form */}
         <form className="card" style={{ display: 'grid', gap: 12 }} onSubmit={save}>
           <label className="label">Item name</label>
-          <input
-            className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Amul Paneer"
-            required
-          />
+          <input className="input" value={name} onChange={(e)=>setName(e.target.value)} placeholder="e.g., Mustard Oil / Paneer / Toor Dal" required/>
 
           <div className="row">
-            <div style={{ flex: 2 }}>
+            <div style={{flex:2}}>
               <label className="label">Quantity</label>
-              <input
-                className="input"
-                type="number"
-                value={qty}
-                onChange={(e) => setQty(e.target.value)}
-                placeholder="e.g., 200"
-                required
-              />
+              <input className="input" type="number" value={qty} onChange={(e)=>setQty(e.target.value)} placeholder="e.g., 200" required/>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Unit</label>
-              <select className="input" value={unit} onChange={(e) => setUnit(e.target.value)}>
+              <select className="input" value={unit} onChange={(e)=>setUnit(e.target.value)}>
                 <option value="g">g</option>
                 <option value="ml">ml</option>
                 <option value="count">count</option>
@@ -255,30 +228,15 @@ export default function AddItem() {
           </div>
 
           <div className="row">
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Calories per 100g/unit (required)</label>
-              <input
-                className="input"
-                type="number"
-                value={cal}
-                onChange={(e) => setCal(e.target.value)}
-                placeholder="e.g., 265"
-                required
-              />
+              <input className="input" type="number" value={cal} onChange={(e)=>setCal(e.target.value)} placeholder="e.g., 265" required/>
             </div>
-            <div style={{ flex: 1 }}>
-              <label className="label">Expiry date (required)</label>
-              <div className="row" style={{ gap: 8 }}>
-                <input
-                  className="input"
-                  type="date"
-                  value={exp}
-                  onChange={(e) => setExp(e.target.value)}
-                  required
-                />
-                <button type="button" className="inline-btn" onClick={autoFillExpiry}>
-                  Autofill (AI)
-                </button>
+            <div style={{flex:1}}>
+              <label className="label">Expiry date <span className="note">(required)</span></label>
+              <div className="row" style={{gap:8}}>
+                <input className="input" type="date" value={exp} onChange={(e)=>setExp(e.target.value)} required/>
+                <button type="button" className="inline-btn" onClick={autoFillExpiry}>Autofill (AI)</button>
               </div>
               <div className="small">Estimated from typical shelf life (you can adjust).</div>
             </div>
@@ -286,78 +244,44 @@ export default function AddItem() {
 
           {/* Macros */}
           <div className="row">
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Protein / 100g (g)</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
-                value={protein}
-                onChange={(e) => setProtein(e.target.value)}
-                placeholder="e.g., 18"
-              />
+              <input className="input" type="number" step="any" value={protein} onChange={(e)=>setProtein(e.target.value)} placeholder="e.g., 18"/>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Carbs / 100g (g)</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
-                value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
-                placeholder="e.g., 4"
-              />
+              <input className="input" type="number" step="any" value={carbs} onChange={(e)=>setCarbs(e.target.value)} placeholder="e.g., 60"/>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Fat / 100g (g)</label>
-              <input
-                className="input"
-                type="number"
-                step="any"
-                value={fat}
-                onChange={(e) => setFat(e.target.value)}
-                placeholder="e.g., 22"
-              />
+              <input className="input" type="number" step="any" value={fat} onChange={(e)=>setFat(e.target.value)} placeholder="e.g., 20"/>
             </div>
           </div>
 
           {/* Optional brand/barcode */}
-          <div className="row" style={{ gap: 8 }}>
-            <div style={{ flex: 1 }}>
+          <div className="row" style={{gap:8}}>
+            <div style={{flex:1}}>
               <label className="label">Brand (optional)</label>
-              <input
-                className="input"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                placeholder="e.g., Amul"
-              />
+              <input className="input" value={brand} onChange={(e)=>setBrand(e.target.value)} placeholder="e.g., Amul"/>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{flex:1}}>
               <label className="label">Barcode (optional)</label>
-              <input
-                className="input"
-                value={barcode}
-                onChange={(e) => setBarcode(e.target.value)}
-                placeholder="(auto if chosen)"
-              />
+              <input className="input" value={barcode} onChange={(e)=>setBarcode(e.target.value)} placeholder="auto-filled if OFF"/>
             </div>
           </div>
 
           <button className="btn primary" type="submit">Save item</button>
         </form>
 
-        <div className="space" />
+        <div className="space"></div>
 
-        {/* Placeholder for Phase 3 (receipt paste → AI parser) */}
+        {/* OCR paste area (Phase 3) */}
         <div className="card" style={{ display: 'grid', gap: 8 }}>
           <div className="label">Paste receipt text (Phase 3 will parse this)</div>
-          <textarea
-            className="input"
-            rows={3}
-            placeholder="e.g., Amul Paneer 200g, Mother Dairy Curd 500g..."
-          />
+          <textarea className="input" rows={3} placeholder="e.g., Amul Paneer 200g, Mustard Oil 1L, Toor Dal 1kg..."></textarea>
           <button className="btn" disabled>Parse & suggest (Coming in Phase 3)</button>
         </div>
+
       </div>
     </>
   );
