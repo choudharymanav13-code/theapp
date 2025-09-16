@@ -1,7 +1,7 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: { appDir: true },
-  images: { unoptimized: true }
+  // Keep this if you want to avoid Next/Image optimization on Vercel’s CDN.
+  images: { unoptimized: true },
 };
+
 export default nextConfig;
