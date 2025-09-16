@@ -1,83 +1,117 @@
 // src/app/api/food-search/route.js
 import { NextResponse } from 'next/server';
 
+// Force Node.js runtime (lets us use regular fetch semantics)
+// and prevent any ISR/cache from persisting results.
+export const runtime = 'nodejs';
+export const revalidate = 0;          // Next.js: no ISR
+export const dynamic = 'force-dynamic'; // ensure per-request run
+
 /**
  * GET /api/food-search?q=paneer
- * Returns: { products: [{ name, brand, kcal_100g, protein_100g, carbs_100g, fat_100g, code }] }
- *
- * Uses OFF v2 /api/v2/search with selected fields; falls back to v1 /cgi/search.pl.
- * OFF advises sending a User-Agent header and supports nocache=1; we do both.
+ * Returns: { products: [{ name, brand, kcal_100g, protein_100g, carbs_100g, fat_100g, code }], error? }
+ * Notes:
+ * - Handles Indian synonyms (dahi->yogurt, poha->flattened rice, roti->chapati, etc.)
+ * - Uses v2 search first, v1 as fallback
+ * - Keeps a result if it has ANY nutrient (not all)
+ * - Adds nocache=1 (OFF notes: search is cached) and prefers English labels
  */
+const SYNONYMS = [
+  [/^dahi$/i, 'yogurt'],
+  [/^curd$/i, 'yogurt'],
+  [/^paneer$/i, 'paneer'],
+  [/^atta$/i, 'wheat flour'],
+  [/^maida$/i, 'refined wheat flour'],
+  [/^rava$|^suji$/i, 'semolina'],
+  [/^poha$/i, 'flattened rice'],
+  [/^roti$|^chapati$/i, 'chapati'],
+  [/^dal$|^daal$/i, 'lentils'],
+  [/^rajma$/i, 'kidney beans'],
+  [/^chana$/i, 'chickpeas'],
+  [/^toor dal$|^arhar$/i, 'pigeon peas'],
+  [/^moong dal$/i, 'mung beans'],
+  [/^bhindi$/i, 'okra'],
+  [/^brinjal$/i, 'eggplant'],
+  [/^capsicum$/i, 'bell pepper'],
+  [/^methi$/i, 'fenugreek leaves'],
+  [/^idli$/i, 'idli'],
+  [/^dosa$/i, 'dosa'],
+  [/^sambar$/i, 'sambar'],
+  [/^upma$/i, 'upma'],
+  [/^biryani$/i, 'biryani'],
+];
+
+function normalizeQuery(q) {
+  const input = q.trim().toLowerCase();
+  for (const [re, repl] of SYNONYMS) if (re.test(input)) return repl;
+  return q.trim();
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const q = (searchParams.get('q') || '').trim();
+  const qRaw = (searchParams.get('q') ?? '').trim();
+  if (!qRaw || qRaw.length < 2) return NextResponse.json({ products: [] });
 
-  if (!q || q.length < 2) {
-    return NextResponse.json({ products: [] });
-  }
+  const q = normalizeQuery(qRaw);
 
-  const headers = {
-    // Recommended by OFF to avoid being blocked by mistake.
-    // Replace URL below with your live Vercel URL once deployed.
-    'User-Agent': 'PantryCoach/1.0 (+https://your-app.vercel.app)',
-  };
+  // OFF strongly recommends sending a User-Agent, but in some runtimes
+  // setting it throws. We omit it for stability, and can re-add once confirmed.
+  const headers = { Accept: 'application/json' };
 
-  // We want only what we need to keep payload small.
-  const fields = 'code,product_name,brands,nutriments';
-  const size = 20;
+  const fields = 'code,product_name,brands,nutriments,languages_tags,countries_tags';
+  const size = 24;
 
+  // Prefer v2 (lighter, field selection), with English label preference & nocache
   const v2Url =
     `https://world.openfoodfacts.org/api/v2/search` +
     `?fields=${encodeURIComponent(fields)}` +
     `&page_size=${size}` +
     `&sort_by=popularity_key` +
     `&search_terms=${encodeURIComponent(q)}` +
-    `&nocache=1`;
+    `&lc=en` +              // prefer English
+    `&nocache=1`;           // OFF: search is cached → request fresh
 
   try {
-    let resp = await fetch(v2Url, { headers });
+    // v2
+    let resp = await fetch(v2Url, { headers, cache: 'no-store' });
     let data = await resp.json();
     let arr = Array.isArray(data?.products) ? data.products : [];
 
-    // Fallback to v1 if v2 yields nothing (or the param changes)
+    // v1 fallback (bias to India)
     if (!arr.length) {
       const v1Url =
         `https://world.openfoodfacts.org/cgi/search.pl` +
         `?action=process&json=1` +
         `&fields=${encodeURIComponent(fields)}` +
         `&page_size=${size}` +
+        `&sort_by=popularity` +
         `&search_terms=${encodeURIComponent(q)}` +
+        `&tagtype_0=countries&tag_contains_0=contains&tag_0=india` +
+        `&lc=en` +
         `&nocache=1`;
-      resp = await fetch(v1Url, { headers });
+      resp = await fetch(v1Url, { headers, cache: 'no-store' });
       data = await resp.json();
       arr = Array.isArray(data?.products) ? data.products : [];
     }
 
-    // Map to a clean shape for the UI
     const out = arr
       .map((p) => {
-        const n = p.nutriments || {};
-        // Prefer OFF's kcal field. If only energy_100g exists (kJ), convert to kcal (~ / 4.184).
-        // OFF stores energy in both kcal and kJ fields when available.
+        const n = p?.nutriments ?? {};
         let kcal = n['energy-kcal_100g'];
         if (kcal == null && n['energy_100g'] != null) {
-          kcal = Number(n['energy_100g']) / 4.184; // approximate conversion
+          kcal = Number(n['energy_100g']) / 4.184; // kJ → kcal (approx)
         }
         return {
-          code: p.code || null,
+          code: p.code ?? null,
           name: p.product_name || '',
           brand: (p.brands || '').split(',')[0]?.trim() || '',
           kcal_100g: kcal != null ? Math.round(Number(kcal)) : null,
-          protein_100g:
-            n['proteins_100g'] != null ? Number(n['proteins_100g']) : null,
-          carbs_100g:
-            n['carbohydrates_100g'] != null
-              ? Number(n['carbohydrates_100g'])
-              : null,
+          protein_100g: n['proteins_100g'] != null ? Number(n['proteins_100g']) : null,
+          carbs_100g: n['carbohydrates_100g'] != null ? Number(n['carbohydrates_100g']) : null,
           fat_100g: n['fat_100g'] != null ? Number(n['fat_100g']) : null,
         };
       })
-      // keep results that have at least kcal or any macro
+      // RELAXED: keep if any nutrient present (else users think search is "broken")
       .filter(
         (x) =>
           x.kcal_100g != null ||
@@ -88,8 +122,9 @@ export async function GET(req) {
 
     return NextResponse.json({ products: out });
   } catch (err) {
+    // Surface the error to the UI so we can SEE it while testing.
     return NextResponse.json(
-      { products: [], error: err?.message || 'Search failed' },
+      { products: [], error: String(err?.message || err || 'Search failed') },
       { status: 200 }
     );
   }
