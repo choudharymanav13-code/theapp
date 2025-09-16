@@ -44,16 +44,13 @@ export default function Home() {
   const sendMagicLink = async (e) => {
     e.preventDefault();
     const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) toast(error.message);
-    else toast('Check your email for the login link!');
+    if (error) toast(error.message); else toast('Check your email for the login link!');
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const signOut = async () => { await supabase.auth.signOut(); };
 
   const invCount = items.length;
-  const expSoon = items.filter((it) => {
+  const expSoon = items.filter(it => {
     if (!it.expiry_date) return false;
     const d = new Date(it.expiry_date + 'T00:00:00');
     const days = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
@@ -62,9 +59,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="header">
-        <h1>Pantry Coach</h1>
-      </div>
+      <div className="header"><h1>Pantry Coach</h1></div>
 
       <div className="content">
         {!session ? (
@@ -82,9 +77,7 @@ export default function Home() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
             />
-            <button className="btn primary" onClick={sendMagicLink}>
-              Send login link
-            </button>
+            <button className="btn primary" onClick={sendMagicLink}>Send login link</button>
           </div>
         ) : (
           <>
@@ -104,17 +97,13 @@ export default function Home() {
             <div className="grid grid-3">
               /add-item+ Add Item</a>
               /log-meal+ Log Meal</a>
-              <recipesView Recipes</a>
+              /recipesView Recipes</a>
             </div>
 
             <div className="space" />
 
-            <button className="btn" onClick={signOut}>
-              Sign out ({session.user.email})
-            </button>
-            <p className="small" style={{ marginTop: 12 }}>
-              Install on iPhone: Share → Add to Home Screen
-            </p>
+            <button className="btn" onClick={signOut}>Sign out ({session.user.email})</button>
+            <p className="small" style={{ marginTop: 12 }}>Install on iPhone: Share → Add to Home Screen</p>
           </>
         )}
       </div>
