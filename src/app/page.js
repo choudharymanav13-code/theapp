@@ -1,112 +1,95 @@
-// src/app/page.js
 'use client';
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
-function toast(msg) {
-  const t = document.createElement('div');
-  t.textContent = msg;
-  Object.assign(t.style, {
-    position: 'fixed',
-    bottom: '80px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: '#111827',
-    border: '1px solid #334155',
-    padding: '10px 14px',
-    borderRadius: '12px',
-    color: '#e5e7eb',
-    zIndex: 9999,
-  });
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 1500);
-}
+import Link from 'next/link';
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [session, setSession] = useState(null);
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => sub.subscription.unsubscribe();
+    fetchItems();
   }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      const { data, error } = await supabase.from('items').select('*');
-      if (!error && data) setItems(data);
-    };
-    if (session) load();
-  }, [session]);
+  async function fetchItems() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('expiry_date', { ascending: true });
 
-  const sendMagicLink = async (e) => {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) toast(error.message); else toast('Check your email for the login link!');
-  };
+    if (!error) setItems(data || []);
+    setLoading(false);
+  }
 
-  const signOut = async () => { await supabase.auth.signOut(); };
+  function totalCalories() {
+    return items.reduce((sum, i) => {
+      const qtyFactor = i.unit === 'g' || i.unit === 'ml'
+        ? (i.quantity / 100)
+        : i.quantity;
+      return sum + (i.calories_per_100g || 0) * qtyFactor;
+    }, 0);
+  }
 
-  const invCount = items.length;
-  const expSoon = items.filter(it => {
-    if (!it.expiry_date) return false;
-    const d = new Date(it.expiry_date + 'T00:00:00');
-    const days = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
-    return days <= 7;
-  }).length;
+  function expiringSoon() {
+    const today = new Date();
+    const soon = new Date();
+    soon.setDate(today.getDate() + 3);
+    return items.filter(i => new Date(i.expiry_date) <= soon).length;
+  }
 
   return (
-    <>
-      <div className="header"><h1>Pantry Coach v0.2</h1></div>
-
-      <div className="content">
-        {!session ? (
-          <div className="card" style={{ display: 'grid', gap: 12 }}>
-            <div className="kpi">
-              <div className="val">Welcome 👋</div>
-              <div className="small">Login with your email (magic link)</div>
-            </div>
-
-            <label className="label">Email</label>
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-            <button className="btn primary" onClick={sendMagicLink}>Send login link</button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-2">
-              <div className="card kpi">
-                <div className="small">Inventory items</div>
-                <div className="val">{invCount}</div>
-              </div>
-              <div className="card kpi">
-                <div className="small">Expiring ≤ 7 days</div>
-                <div className="val">{expSoon}</div>
-              </div>
-            </div>
-
-            <div className="space" />
-
-            <div className="grid grid-3">
-              <a href="/add-item">+ Add Item</a>
-              <a href="/log-meal">+ Log Meal</a>
-              <a href="/recipes">View Recipes</a>
-            </div>
-
-            <div className="space" />
-
-            <button className="btn" onClick={signOut}>Sign out ({session.user.email})</button>
-            <p className="small" style={{ marginTop: 12 }}>Install on iPhone: Share → Add to Home Screen</p>
-          </>
-        )}
+    <div style={{ background: '#111827', minHeight: '100vh', color: '#f9fafb' }}>
+      <div className="header" style={{ padding: '16px 20px' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Pantry Coach</h1>
       </div>
-    </>
+
+      <div className="content" style={{ padding: 20, display: 'grid', gap: 20 }}>
+        {/* Stats */}
+        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
+            <div className="small">📦 Total items</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{items.length}</div>
+          </div>
+          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
+            <div className="small">⏳ Expiring soon</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{expiringSoon()}</div>
+          </div>
+          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
+            <div className="small">🔥 Pantry calories</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalCalories()}</div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <Link href="/add-item" className="btn primary" style={{ textAlign: 'center', background: '#2563eb', color: 'white', padding: '12px 16px', borderRadius: 8, textDecoration: 'none' }}>
+          ➕ Add Item
+        </Link>
+
+        {/* Recent items */}
+        <div style={{ background: '#1f2937', borderRadius: 12, padding: 16 }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: 8 }}>Recent items</h2>
+          {loading ? (
+            <div className="small">Loading…</div>
+          ) : items.length === 0 ? (
+            <div className="small">No items yet. Add something!</div>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {items.slice(0, 5).map(i => (
+                <li key={i.id} style={{ padding: '6px 0', borderBottom: '1px solid #374151' }}>
+                  <div style={{ fontWeight: '500' }}>{i.name}</div>
+                  <div className="small" style={{ color: '#9ca3af' }}>
+                    {i.quantity}{i.unit} • {i.calories_per_100g} kcal/100g • Exp {i.expiry_date}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
