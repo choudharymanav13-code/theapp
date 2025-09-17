@@ -26,7 +26,7 @@ const cacheSet = (k, v) => {
 };
 
 // ---------- utils ----------
-const UA = process.env.OFF_USER_AGENT || 'PantryCoach/1.0 (+https://your-app.vercel.app)'; // set to your Vercel URL in Vercel env for best reliability
+const UA = process.env.OFF_USER_AGENT || 'PantryCoach/1.0 (+https://your-app.vercel.app)'; // set to your Vercel URL for best reliability
 const OFF_FIELDS = 'code,product_name,brands,nutriments';
 
 const norm = (s) =>
@@ -43,7 +43,7 @@ const uniqNB = (arr) => {
   return out;
 };
 
-// Soft similarity
+// soft similarity
 const tokenScore = (q, t) => {
   const A = new Set(toks(q)), B = toks(t);
   if (!A.size || !B.length) return 0;
@@ -52,14 +52,14 @@ const tokenScore = (q, t) => {
   return hit / Math.max(B.length, A.size);
 };
 
-// Strong query‑centric boosts
+// strong query‑centric boosts
 function queryBoost(q, name, brand) {
   if (!q) return 0;
   const nq = q.trim().toLowerCase();
   const nn = (name || '').trim().toLowerCase();
   const nb = (brand || '').trim().toLowerCase();
 
-  if (nn === nq) return 120;       // exact name equals query
+  if (nn === nq) return 120;        // exact name equals query
   if (nn.startsWith(nq)) return 60; // name starts with query
 
   // token overlaps (e.g., "paneer masala" vs "paneer")
@@ -79,7 +79,7 @@ function queryBoost(q, name, brand) {
 const scoreItem = (it, q, cat) => {
   let s = 0;
 
-  // strong boosts first
+  // strong boosts
   s += queryBoost(q, it.name, it.brand);
 
   // soft similarity
@@ -94,7 +94,7 @@ const scoreItem = (it, q, cat) => {
     if (it.category === cat) s += 1.2;
   }
 
-  // small nudge for OFF in search contexts (prefer branded when typing)
+  // prefer OFF a bit when typing (branded results)
   if (it.source === 'off' && q) s += 2.0;
 
   // small penalty if completely missing macros
@@ -103,22 +103,18 @@ const scoreItem = (it, q, cat) => {
   return s;
 };
 
-// ---------- robust loader for staples (tries both) ----------
+// ---------- robust loader for staples (fixed single path) ----------
 async function loadFallbackModule() {
   try {
-    // src/data/…
+    // Your dataset is here: src/data/fallbackFoods.js
     return await import('../../../data/fallbackFoods.js');
-  } catch {
-    try {
-      // src/app/data/…
-      return await import('../../data/fallbackFoods.js');
-    } catch {
-      console.error('[food-search] fallbackFoods module not found at src/data or src/app/data');
-      return {
-        CATEGORIES: ['Staples', 'Oils', 'Vegetables', 'Fruits', 'Grains & Pulses', 'Dairy'],
-        searchFallbackFoods: () => []
-      };
-    }
+  } catch (e) {
+    console.error('[food-search] fallbackFoods missing or failed to load:', e?.message || e);
+    // grace­ful degradation: empty staples so API never crashes
+    return {
+      CATEGORIES: ['Staples', 'Oils', 'Vegetables', 'Fruits', 'Grains & Pulses', 'Dairy'],
+      searchFallbackFoods: () => [],
+    };
   }
 }
 
@@ -142,7 +138,7 @@ async function offV1Smart(q, size, headers) {
     `?action=process&json=1` +
     `&search_terms=${encodeURIComponent(q)}` +
     `&search_simple=1` +                 // looser matches
-    `&countries_tags_en=india` +         // relevance for India
+    `&countries_tags_en=india` +         // India relevance
     `&page_size=${size}` +
     `&fields=${encodeURIComponent(OFF_FIELDS)}` +
     `&nocache=1`;
