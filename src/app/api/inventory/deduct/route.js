@@ -1,19 +1,14 @@
 // src/app/api/inventory/deduct/route.js
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../../../lib/supabaseClient';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-// --- simple conversions ---
-function normalizeQty(qty, unit) {
-  if (!unit) return { qty, unit: 'count' };
+// helper: normalize units (convert kg→g, l→ml, etc.)
+function normalize(qty, unit) {
+  if (!unit) return { qty, unit };
   const u = unit.toLowerCase();
   if (u === 'kg') return { qty: qty * 1000, unit: 'g' };
   if (u === 'g') return { qty, unit: 'g' };
-  if (u === 'l') return { qty * 1000, unit: 'ml' };
+  if (u === 'l') return { qty: qty * 1000, unit: 'ml' };
   if (u === 'ml') return { qty, unit: 'ml' };
   return { qty, unit }; // leave as is
 }
@@ -22,52 +17,47 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { name, qty, unit } = body;
-
     if (!name || !qty) {
-      return NextResponse.json({ error: 'Missing name or qty' }, { status: 400 });
+      return NextResponse.json({ error: 'missing name/qty' }, { status: 400 });
     }
 
-    // normalize units
-    const { qty: normQty, unit: normUnit } = normalizeQty(Number(qty), unit);
+    const norm = normalize(qty, unit);
 
-    // Get user
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    // get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'not signed in' }, { status: 401 });
     }
 
-    // Find item (first match only)
-    const { data: items, error: fetchError } = await supabase
+    // find item in DB
+    const { data: items } = await supabase
       .from('items')
       .select('*')
       .eq('user_id', user.id)
-      .ilike('name', `%${name}%`);
+      .ilike('name', name)
+      .limit(1);
 
-    if (fetchError) throw fetchError;
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: `No inventory match for ${name}` }, { status: 404 });
+      return NextResponse.json({ error: 'item not found in pantry' }, { status: 404 });
     }
 
     const item = items[0];
-    let newQty = Number(item.quantity) - normQty;
+    let newQty = item.quantity - norm.qty;
     if (newQty < 0) newQty = 0;
 
-    const { error: updateError } = await supabase
+    // update DB
+    const { error } = await supabase
       .from('items')
       .update({ quantity: newQty })
       .eq('id', item.id);
 
-    if (updateError) throw updateError;
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    return NextResponse.json({
-      message: `Deducted ${normQty}${normUnit} from ${item.name}`,
-      remaining: newQty
-    });
+    return NextResponse.json({ message: `deducted ${norm.qty}${norm.unit} from ${name}`, remaining: newQty });
   } catch (err) {
-    console.error('Deduct API error:', err);
-    return NextResponse.json({ error: 'Failed to deduct' }, { status: 500 });
+    console.error('deduct API error:', err);
+    return NextResponse.json({ error: 'internal error' }, { status: 500 });
   }
 }
