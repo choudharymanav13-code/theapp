@@ -1,48 +1,54 @@
 // public/sw.js
-const CACHE = 'pantry-coach-v5';
-const ASSETS = ['/', '/manifest.json'];
 
-self.addEventListener('install', (e) => {
-  // Take control immediately
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
-});
+// 🔄 bump version every deploy (important!)
+const CACHE_NAME = "pantry-coach-v4";  
 
-self.addEventListener('activate', (e) => {
-  // Become active immediately on all clients and clear old caches
-  e.waitUntil(
-    (async () => {
-      await self.clients.claim();
-      const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
-    })()
+// Files to pre-cache (optional: keep minimal)
+const FILES_TO_CACHE = [
+  "/", 
+  "/manifest.json"
+];
+
+// Install
+self.addEventListener("install", (event) => {
+  console.log("[ServiceWorker] Install");
+  self.skipWaiting(); // take control immediately
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(FILES_TO_CACHE);
+    })
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
+// Activate
+self.addEventListener("activate", (event) => {
+  console.log("[ServiceWorker] Activate");
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log("[ServiceWorker] Removing old cache", key);
+            return caches.delete(key);
+          }
+        })
+      )
+    )
+  );
+  self.clients.claim(); // take over all tabs immediately
+});
 
-  // Never cache API or Supabase calls
-  if (url.pathname.startsWith('/api/') || url.hostname.endsWith('.supabase.co')) {
-    e.respondWith(fetch(e.request).catch(() => new Response('{"products":[]}', { status: 200 })));
-    return;
-  }
-
-  // Cache-first for static app assets
-  if (url.origin === self.location.origin) {
-    e.respondWith(
-      caches
-        .match(e.request)
-        .then(
-          (resp) =>
-            resp ||
-            fetch(e.request).then((fetchResp) => {
-              const copy = fetchResp.clone();
-              caches.open(CACHE).then((cache) => cache.put(e.request, copy)).catch(() => {});
-              return fetchResp;
-            })
+// Fetch
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      return (
+        cached ||
+        fetch(event.request).catch(() =>
+          // fallback for offline
+          new Response("Offline", { status: 503 })
         )
-        .catch(() => caches.match('/'))
-    );
-  }
+      );
+    })
+  );
 });
