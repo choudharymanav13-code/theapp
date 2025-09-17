@@ -1,8 +1,9 @@
 // src/app/add-item/page.js
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
 /* ---------------- AI Expiry Helpers ---------------- */
 function daysFromNow(d) {
@@ -62,14 +63,19 @@ export default function AddItem() {
   const [brand, setBrand] = useState('');
   const [barcode, setBarcode] = useState('');
 
-  /* -------- Search state (OFF v2) -------- */
+  /* -------- Search state -------- */
   const [q, setQ] = useState('');
   const dq = useDebouncedValue(q, 350);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [widen, setWiden] = useState(false); // widen beyond India if needed
+  const [widen, setWiden] = useState(false);
+
+  /* -------- Barcode scanner state -------- */
+  const [scanning, setScanning] = useState(false);
+  const videoRef = useRef(null);
+  const codeReader = useRef(null);
 
   /* -------- Actions -------- */
   const autoFillExpiry = () => {
@@ -79,7 +85,6 @@ export default function AddItem() {
   };
 
   const pickResult = (p) => {
-    // Map picked product fields into the form
     if (p?.name) setName(p.name);
     setBrand(p?.brand || '');
     setBarcode(p?.code || '');
@@ -103,7 +108,6 @@ export default function AddItem() {
       unit,
       calories_per_100g: Number(cal),
       expiry_date: exp,
-      // optional macros
       protein_100g: protein !== '' ? Number(protein) : null,
       carbs_100g: carbs !== '' ? Number(carbs) : null,
       fat_100g: fat !== '' ? Number(fat) : null,
@@ -115,18 +119,26 @@ export default function AddItem() {
     else window.location.href = '/inventory';
   }
 
-  /* -------- Backend call to OFF v2 proxy (your /api/food-search) -------- */
-  async function fetchPage(p, append = false) {
-    if (!dq || dq.trim().length < 2) { setResults([]); setHasMore(false); return; }
-    const countries = widen ? 'india|united-kingdom|united-states' : 'india';
-    const url = `/api/food-search?q=${encodeURIComponent(dq)}&page=${p}&pageSize=30&countries=${encodeURIComponent(countries)}`;
+  /* -------- Backend call -------- */
+  async function fetchPage(p, append = false, mode = "search") {
+    const params = new URLSearchParams();
+    if (mode === "search") {
+      if (!dq || dq.trim().length < 2) { setResults([]); setHasMore(false); return; }
+      params.set("q", dq);
+    } else if (mode === "barcode" && barcode) {
+      params.set("barcode", barcode);
+    }
+    params.set("page", p);
+    params.set("pageSize", 30);
+    params.set("countries", widen ? "india|united-kingdom|united-states" : "india");
+
     setLoading(true);
     try {
-      const r = await fetch(url);
+      const r = await fetch(`/api/food-search?${params.toString()}`);
       const j = await r.json();
       const arr = Array.isArray(j?.products) ? j.products : [];
       setResults(prev => (append ? [...prev, ...arr] : arr));
-      setHasMore(arr.length >= 30); // heuristic: full page implies more pages
+      setHasMore(arr.length >= 30);
     } catch {
       if (!append) setResults([]);
       setHasMore(false);
@@ -135,26 +147,59 @@ export default function AddItem() {
     }
   }
 
-  /* -------- Trigger search when query or “widen” changes -------- */
+  /* -------- Trigger search -------- */
   useEffect(() => {
     setPage(1);
-    if (dq && dq.trim().length >= 2) fetchPage(1, false);
+    if (dq && dq.trim().length >= 2) fetchPage(1, false, "search");
     else { setResults([]); setHasMore(false); }
   }, [dq, widen]);
+
+  /* -------- Barcode scanner -------- */
+  const startScanner = async () => {
+    setScanning(true);
+    if (!codeReader.current) {
+      codeReader.current = new BrowserMultiFormatReader();
+    }
+    try {
+      const devices = await codeReader.current.listVideoInputDevices();
+      const deviceId = devices[0]?.deviceId;
+      if (!deviceId) {
+        alert("No camera found");
+        setScanning(false);
+        return;
+      }
+      codeReader.current.decodeFromVideoDevice(deviceId, videoRef.current, (result, err) => {
+        if (result) {
+          setBarcode(result.text);
+          setScanning(false);
+          codeReader.current.reset();
+          fetchPage(1, false, "barcode");
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      setScanning(false);
+    }
+  };
+
+  const stopScanner = () => {
+    if (codeReader.current) codeReader.current.reset();
+    setScanning(false);
+  };
 
   return (
     <>
       <div className="header"><h1>Add Item</h1></div>
 
       <div className="content">
-        {/* ---------- Search & Autofill card (OFF v2) ---------- */}
+        {/* ---------- Search & Autofill card ---------- */}
         <div className="card" style={{ display: 'grid', gap: 10 }}>
           <div className="label">Search food (autofill calories & macros)</div>
 
           <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <input
               className="input"
-              placeholder="Try: paneer, dahi/curd, bhindi/okra, poha…"
+              placeholder="Try: paneer, dahi, maggi, kurkure…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -167,6 +212,28 @@ export default function AddItem() {
               Widen results
             </label>
           </div>
+
+          <div className="row" style={{ gap: 8 }}>
+            <input
+              className="input"
+              placeholder="Enter barcode"
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value)}
+            />
+            <button className="btn" type="button" onClick={() => fetchPage(1, false, "barcode")}>
+              Lookup Barcode
+            </button>
+            <button className="btn" type="button" onClick={startScanner}>
+              {scanning ? "Scanning..." : "Scan Barcode"}
+            </button>
+          </div>
+
+          {scanning && (
+            <div style={{ marginTop: 8 }}>
+              <video ref={videoRef} style={{ width: "100%" }} />
+              <button className="btn" type="button" onClick={stopScanner}>Stop</button>
+            </div>
+          )}
 
           {loading && <div className="small">Searching…</div>}
 
@@ -205,7 +272,7 @@ export default function AddItem() {
               onClick={() => {
                 const next = page + 1;
                 setPage(next);
-                fetchPage(next, true); // append next page
+                fetchPage(next, true, "search");
               }}
             >
               Load more
@@ -215,11 +282,10 @@ export default function AddItem() {
 
         <div className="space"></div>
 
-        {/* ---------- Main form (required + optional) ---------- */}
+        {/* ---------- Main form ---------- */}
         <form className="card" style={{ display: 'grid', gap: 12 }} onSubmit={save}>
           <label className="label">Item name</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Amul Paneer" required/>
-
           <div className="row">
             <div style={{ flex: 2 }}>
               <label className="label">Quantity</label>
@@ -235,7 +301,6 @@ export default function AddItem() {
               </select>
             </div>
           </div>
-
           <div className="row">
             <div style={{ flex: 1 }}>
               <label className="label">Calories per 100g/unit (required)</label>
@@ -248,11 +313,8 @@ export default function AddItem() {
                 <input className="input" type="date" value={exp} onChange={(e) => setExp(e.target.value)} required/>
                 <button type="button" className="inline-btn" onClick={autoFillExpiry}>Autofill (AI)</button>
               </div>
-              <div className="small">Estimated from typical shelf life (you can adjust).</div>
             </div>
           </div>
-
-          {/* Optional macros */}
           <div className="row">
             <div style={{ flex: 1 }}>
               <label className="label">Protein / 100g (g)</label>
@@ -270,8 +332,6 @@ export default function AddItem() {
                      onChange={(e) => setFat(e.target.value)} placeholder="e.g., 22"/>
             </div>
           </div>
-
-          {/* Optional brand/barcode */}
           <div className="row" style={{ gap: 8 }}>
             <div style={{ flex: 1 }}>
               <label className="label">Brand (optional)</label>
@@ -282,18 +342,8 @@ export default function AddItem() {
               <input className="input" value={barcode} onChange={(e)=>setBarcode(e.target.value)} placeholder="(auto if chosen)"/>
             </div>
           </div>
-
           <button className="btn primary" type="submit">Save item</button>
         </form>
-
-        <div className="space"></div>
-
-        {/* ---------- OCR paste placeholder (Phase 3) ---------- */}
-        <div className="card" style={{ display: 'grid', gap: 8 }}>
-          <div className="label">Paste receipt text (Phase 3 will parse this)</div>
-          <textarea className="input" rows={3} placeholder="e.g., Amul Paneer 200g, Mother Dairy Curd 500g..."></textarea>
-          <button className="btn" disabled>Parse & suggest (Coming in Phase 3)</button>
-        </div>
       </div>
     </>
   );
