@@ -154,7 +154,20 @@ export async function GET(req) {
     if (!filtered.length && q) filtered = scored.filter(x => x.source==='off');
   }
 
-  filtered.sort((a,b)=>b.__s - a.__s);
+ 
+// Prefer exact name matches first, then by score
+const eq = (name, q) => {
+  if (!q || !name) return false;
+  return name.trim().toLowerCase() === q.trim().toLowerCase();
+};
+
+filtered.sort((a, b) => {
+  const ax = eq(a.name, q) ? 1 : 0;
+  const bx = eq(b.name, q) ? 1 : 0;
+  if (ax !== bx) return bx - ax;  // exact match to top
+  return b.__s - a.__s;           // otherwise by score
+});
+
   const products = filtered.slice(0, size).map(({__s, ...rest}) => rest);
 
   const payload = {
