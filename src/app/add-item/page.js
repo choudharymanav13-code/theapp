@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
-// ---------- Helpers: AI expiry (same logic extended a bit) ----------
+// ---------- Helpers: AI expiry ----------
 function daysFromNow(d) {
   const dt = new Date(); dt.setDate(dt.getDate() + d);
   const y = dt.getFullYear(), m = String(dt.getMonth()+1).padStart(2, '0'), da = String(dt.getDate()).padStart(2, '0');
@@ -42,14 +42,12 @@ function shelfLifeDaysFor(name) {
   if (/frozen/.test(n)) return 180;
   return 30;
 }
-
 function useDebounced(val, ms) {
   const [v, setV] = useState(val);
   useEffect(() => { const t = setTimeout(() => setV(val), ms); return () => clearTimeout(t); }, [val, ms]);
   return v;
 }
 
-// ---------- Component ----------
 export default function AddItem() {
   // Form
   const [name, setName] = useState('');
@@ -83,9 +81,7 @@ export default function AddItem() {
         const j = await r.json();
         if (aborted) return;
         setResults(Array.isArray(j?.products) ? j.products : []);
-        if (Array.isArray(j?.categories) && j.categories.length) {
-          setCats(j.categories);
-        }
+        if (Array.isArray(j?.categories) && j.categories.length) setCats(j.categories);
       } catch {
         if (!aborted) setResults([]);
       } finally {
@@ -117,7 +113,6 @@ export default function AddItem() {
     e.preventDefault();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return alert('You must be signed in.');
-
     if (!name || !qty || !cal || !exp) return alert('All required fields must be filled.');
 
     const payload = {
@@ -135,6 +130,19 @@ export default function AddItem() {
     const { error } = await supabase.from('items').insert(payload);
     if (error) alert(error.message);
     else window.location.href = '/inventory';
+  };
+
+  const SourcePill = ({ source }) => {
+    const isOFF = source === 'off';
+    const label = isOFF ? 'OFF' : 'Staple';
+    const bg = isOFF ? '#065f46' : '#1f2937';
+    const br = isOFF ? '#10b981' : '#334155';
+    return (
+      <span style={{
+        marginLeft: 6, fontSize: 12, padding: '2px 8px', borderRadius: 999,
+        background: bg, border: `1px solid ${br}`, color: '#e5e7eb'
+      }}>{label}</span>
+    );
   };
 
   return (
@@ -170,7 +178,7 @@ export default function AddItem() {
           <div className="label">Search food (autofill calories & macros)</div>
           <input
             className="input"
-            placeholder="Try: paneer, dal, oats, mustard oil, banana…"
+            placeholder="Try: paneer, maggi, amul, oats, mustard oil…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -188,7 +196,7 @@ export default function AddItem() {
                     <div className="item-title">
                       {r.name || 'Unnamed'}
                       {r.brand ? <span className="badge" style={{ marginLeft: 6 }}>{r.brand}</span> : null}
-                      {r.source === 'fallback' ? <span className="badge" style={{ marginLeft: 6 }}>Staple</span> : null}
+                      <SourcePill source={r.source} />
                     </div>
                     <div className="item-sub">
                       {(r.kcal_100g != null ? `${r.kcal_100g} kcal/100g` : '— kcal')}
