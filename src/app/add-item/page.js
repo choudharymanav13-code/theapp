@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { BrowserMultiFormatReader } from '@zxing/library';
-import { parseReceiptText } from '@/utils/parseReceipt';
+import { parseReceiptText } from '../../utils/parseReceipt';
 
 /* ---------------- AI Expiry Helpers ---------------- */
 function daysFromNow(d) {
