@@ -1,265 +1,118 @@
 // src/app/api/food-search/route.js
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { NextResponse } from 'next/server';
 
-// ---------- tiny cache ----------
-const MAX_CACHE_ENTRIES = 120;
-const CACHE_TTL_MS = 60_000;
-globalThis.__FOOD_CACHE__ ||= new Map();
-const cache = globalThis.__FOOD_CACHE__;
-
-const cacheGet = (k) => {
-  const e = cache.get(k);
-  if (!e) return null;
-  if (Date.now() - e.t > CACHE_TTL_MS) { cache.delete(k); return null; }
-  return e.v;
-};
-const cacheSet = (k, v) => {
-  cache.set(k, { v, t: Date.now() });
-  if (cache.size > MAX_CACHE_ENTRIES) {
-    const first = cache.keys().next().value;
-    if (first) cache.delete(first);
-  }
+const SYNONYMS = {
+  curd: ['dahi', 'yogurt', 'yoghurt'],
+  dahi: ['curd', 'yogurt', 'yoghurt'],
+  brinjal: ['eggplant', 'aubergine'],
+  eggplant: ['brinjal', 'aubergine'],
+  aubergine: ['eggplant', 'brinjal'],
+  ladyfinger: ['okra', 'bhindi'],
+  okra: ['ladyfinger', 'bhindi'],
+  bhindi: ['ladyfinger', 'okra'],
+  poha: ['flattened rice', 'aval'],
+  chapati: ['roti', 'chapathi', 'phulka'],
+  roti: ['chapati', 'chapathi', 'phulka'],
+  paneer: ['cottage cheese'],
+  atta: ['whole wheat flour'],
 };
 
-// ---------- utils ----------
-const UA = process.env.OFF_USER_AGENT || 'PantryCoach/1.0 (+https://your-app.vercel.app)'; // set to your Vercel URL for best reliability
-const OFF_FIELDS = 'code,product_name,brands,nutriments';
-
-const norm = (s) =>
-  (s || '').toString().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
-const toks = (s) => norm(s).replace(/[^a-z0-9\s]+/g, ' ').split(/\s+/).filter(Boolean);
-const keyNB = (n, b) => `${norm(n)}|${norm(b)}`;
-const uniqNB = (arr) => {
-  const seen = new Set();
-  const out = [];
-  for (const x of arr) {
-    const k = keyNB(x.name, x.brand);
-    if (!seen.has(k)) { seen.add(k); out.push(x); }
-  }
-  return out;
-};
-
-// soft similarity
-const tokenScore = (q, t) => {
-  const A = new Set(toks(q)), B = toks(t);
-  if (!A.size || !B.length) return 0;
-  let hit = 0;
-  for (const w of B) if (A.has(w)) hit++;
-  return hit / Math.max(B.length, A.size);
-};
-
-// strong query‑centric boosts
-function queryBoost(q, name, brand) {
-  if (!q) return 0;
-  const nq = q.trim().toLowerCase();
-  const nn = (name || '').trim().toLowerCase();
-  const nb = (brand || '').trim().toLowerCase();
-
-  if (nn === nq) return 120;        // exact name equals query
-  if (nn.startsWith(nq)) return 60; // name starts with query
-
-  // token overlaps (e.g., "paneer masala" vs "paneer")
-  const qt = new Set(nq.split(/\s+/).filter(Boolean));
-  const nt = new Set(nn.split(/\s+/).filter(Boolean));
-  let hits = 0;
-  qt.forEach(t => { if (nt.has(t)) hits++; });
-
-  let score = hits * 14;
-
-  // brand helps too (e.g., “amul”, “maggi”)
-  if (nb && (nb === nq || nb.startsWith(nq))) score += 16;
-
-  return score;
+function mapProduct(p) {
+  const n = p?.nutriments || {};
+  const kcal = n['energy-kcal_100g'] ?? n['energy-kcal_serving'] ?? n['energy-kcal'];
+  const protein = n['proteins_100g'] ?? n['proteins_serving'];
+  const carbs = n['carbohydrates_100g'] ?? n['carbohydrates_serving'];
+  const fat = n['fat_100g'] ?? n['fat_serving'];
+  return {
+    code: p.code || null,
+    name: p.product_name || '',
+    brand: p.brands || '',
+    kcal_100g: typeof kcal === 'number' ? Math.round(kcal) : null,
+    protein_100g: typeof protein === 'number' ? Number(protein) : null,
+    carbs_100g: typeof carbs === 'number' ? Number(carbs) : null,
+    fat_100g: typeof fat === 'number' ? Number(fat) : null,
+  };
 }
 
-const scoreItem = (it, q, cat) => {
-  let s = 0;
+async function offSearch({ q, page, pageSize, countries, sortBy }) {
+  const fields = [
+    'code',
+    'product_name',
+    'brands',
+    'nutriments',
+    'countries_tags',
+    'quantity',
+    'serving_size',
+  ].join(',');
 
-  // strong boosts
-  s += queryBoost(q, it.name, it.brand);
-
-  // soft similarity
-  s += tokenScore(q, `${it.name || ''} ${it.brand || ''}`) * 5;
-
-  // macros presence
-  const mac = [it.kcal_100g, it.protein_100g, it.carbs_100g, it.fat_100g].filter(v => v != null).length;
-  s += mac * 0.8;
-
-  // category alignment for staples when tab selected
-  if (it.source === 'fallback' && it.category && cat && cat !== 'All') {
-    if (it.category === cat) s += 1.2;
-  }
-
-  // prefer OFF a bit when typing (branded results)
-  if (it.source === 'off' && q) s += 2.0;
-
-  // small penalty if completely missing macros
-  if (mac === 0) s -= 0.5;
-
-  return s;
-};
-
-// ---------- robust loader for staples (fixed single path) ----------
-async function loadFallbackModule() {
-  try {
-    // Your dataset is here: src/data/fallbackFoods.js
-    return await import('../../../data/fallbackFoods.js');
-  } catch (e) {
-    console.error('[food-search] fallbackFoods missing or failed to load:', e?.message || e);
-    // grace­ful degradation: empty staples so API never crashes
-    return {
-      CATEGORIES: ['Staples', 'Oils', 'Vegetables', 'Fruits', 'Grains & Pulses', 'Dairy'],
-      searchFallbackFoods: () => [],
-    };
-  }
-}
-
-// ---------- OFF helpers ----------
-async function offV2(q, size, headers) {
-  const url =
-    `https://world.openfoodfacts.org/api/v2/search` +
-    `?fields=${encodeURIComponent(OFF_FIELDS)}` +
-    `&page_size=${size}` +
-    `&sort_by=popularity_key` +
-    `&search_terms=${encodeURIComponent(q)}` +
-    `&nocache=1`;
-  const r = await fetch(url, { headers, cache: 'no-store' });
-  const j = await r.json();
-  return Array.isArray(j?.products) ? j.products : [];
-}
-
-async function offV1Smart(q, size, headers) {
-  const url =
-    `https://world.openfoodfacts.org/cgi/search.pl` +
-    `?action=process&json=1` +
-    `&search_terms=${encodeURIComponent(q)}` +
-    `&search_simple=1` +                 // looser matches
-    `&countries_tags_en=india` +         // India relevance
-    `&page_size=${size}` +
-    `&fields=${encodeURIComponent(OFF_FIELDS)}` +
-    `&nocache=1`;
-  const r = await fetch(url, { headers, cache: 'no-store' });
-  const j = await r.json();
-  return Array.isArray(j?.products) ? j.products : [];
-}
-
-function mapOFF(arr) {
-  return arr.map(p => {
-    const n = p.nutriments || {};
-    let kcal = n['energy-kcal_100g'];
-    if (kcal == null && n['energy_100g'] != null) kcal = Number(n['energy_100g']) / 4.184; // kJ → kcal
-    return {
-      code: p.code || null,
-      name: p.product_name || '',
-      brand: (p.brands || '').split(',')[0]?.trim() || '',
-      kcal_100g: kcal != null ? Math.round(Number(kcal)) : null,
-      protein_100g: n['proteins_100g'] != null ? Number(n['proteins_100g']) : null,
-      carbs_100g: n['carbohydrates_100g'] != null ? Number(n['carbohydrates_100g']) : null,
-      fat_100g: n['fat_100g'] != null ? Number(n['fat_100g']) : null,
-      source: 'off',
-    };
+  const sp = new URLSearchParams({
+    search_terms: q,
+    fields,
+    page: String(page),
+    page_size: String(pageSize),
+    sort_by: sortBy, // 'popularity_key' is supported by OFF v2
   });
+
+  if (countries) sp.set('countries_tags_en', countries); // e.g., 'india' or 'india|united-kingdom|united-states'
+  const url = `https://world.openfoodfacts.org/api/v2/search?${sp.toString()}`;
+
+  const resp = await fetch(url, { headers: { 'User-Agent': 'PantryCoach/1.0' } });
+  const data = await resp.json();
+  const products = Array.isArray(data?.products) ? data.products : [];
+  return products.map(mapProduct);
 }
 
-// ---------- handler ----------
 export async function GET(req) {
-  const u = new URL(req.url);
-  const q = (u.searchParams.get('q') || '').trim();
-  const category = (u.searchParams.get('category') || 'All').trim();
-  const size = Math.max(1, Math.min(100, Number(u.searchParams.get('size') || 20)));
-  const source = (u.searchParams.get('source') || 'all').toLowerCase(); // all | off | fallback
-  const strict = u.searchParams.get('strict') === '1';
-  const debug = u.searchParams.get('debug') === '1';
+  const { searchParams } = new URL(req.url);
+  const raw = (searchParams.get('q') || '').trim();
+  const page = Math.max(1, Number(searchParams.get('page') || '1'));
+  const pageSize = Math.min(50, Math.max(10, Number(searchParams.get('pageSize') || '30')));
+  const countries = searchParams.get('countries') || 'india'; // prefer India; widen later if needed
+  const sortBy = searchParams.get('sortBy') || 'popularity_key';
 
-  const cacheKey = JSON.stringify({ q, category, size, source, strict });
-  const hit = cacheGet(cacheKey);
-  if (hit) return NextResponse.json(hit);
+  if (!raw || raw.length < 2) return NextResponse.json({ products: [] });
 
-  const headers = { 'User-Agent': UA, 'Accept': 'application/json' };
+  // Primary search
+  let results = await offSearch({ q: raw, page, pageSize, countries, sortBy });
 
-  // Load staples safely
-  const { CATEGORIES, searchFallbackFoods } = await loadFallbackModule();
-
-  // Fallback suggestions (category-first)
-  let fallbackList = [];
-  if (source !== 'off') {
-    fallbackList = searchFallbackFoods(q, category, size);
-    if (strict && category && category !== 'All') {
-      fallbackList = fallbackList.filter(x => x.category === category);
+  // If too few, expand with up to 2 synonyms (keeps requests polite)
+  const key = raw.toLowerCase();
+  const syns = (SYNONYMS[key] || []).slice(0, 2);
+  if (results.length < 12 && syns.length) {
+    const extras = await Promise.all(
+      syns.map(s =>
+        offSearch({
+          q: s,
+          page: 1,
+          pageSize: Math.ceil(pageSize / syns.length),
+          countries,
+          sortBy,
+        })
+      )
+    );
+    const mapKey = x => `${x.name.toLowerCase()}|${x.brand.toLowerCase()}|${x.code || ''}`;
+    const seen = new Set(results.map(mapKey));
+    for (const arr of extras) {
+      for (const item of arr) {
+        const k = mapKey(item);
+        if (!seen.has(k)) {
+          results.push(item);
+          seen.add(k);
+        }
+      }
     }
   }
 
-  // OFF results
-  let offResults = [];
-  let usedV2 = false, usedV1 = false;
-  if (source !== 'fallback' && q.length >= 2) {
-    try {
-      const v2 = await offV2(q, size, headers); usedV2 = true;
-      let arr = v2;
-      if (!arr.length || arr.length < 5) {
-        const v1 = await offV1Smart(q, size, headers); usedV1 = true;
-        arr = [...v2, ...v1];
-      }
-      const mapped = mapOFF(arr);
-      let kept = mapped.filter(x =>
-        x.kcal_100g != null || x.protein_100g != null || x.carbs_100g != null || x.fat_100g != null
-      );
-      if (kept.length < 5) kept = mapped;
-      offResults = uniqNB(kept);
-    } catch (e) {
-      console.error('[food-search] OFF error:', e);
-    }
-  }
+  // Keep items that have some nutrition info; cap length
+  const filtered = results
+    .filter(
+      x =>
+        x.kcal_100g !== null ||
+        x.protein_100g !== null ||
+        x.carbs_100g !== null ||
+        x.fat_100g !== null
+    )
+    .slice(0, pageSize);
 
-  // Merge
-  let merged =
-    source === 'off' ? offResults :
-    source === 'fallback' ? fallbackList :
-    uniqNB([...offResults, ...fallbackList]); // all
-
-  // Score
-  const scored = merged.map(it => ({ ...it, __s: scoreItem(it, q, category) }));
-
-  // Strict category filter if requested
-  let filtered = scored;
-  if (strict && category && category !== 'All') {
-    filtered = scored.filter(x => x.source === 'fallback' && x.category === category);
-    if (!filtered.length && q) filtered = scored.filter(x => x.source === 'off');
-  }
-
-  // Prefer exact name match first, then by score
-  const eq = (name, q) => {
-    if (!q || !name) return false;
-    return name.trim().toLowerCase() === q.trim().toLowerCase();
-  };
-  filtered.sort((a, b) => {
-    const ax = eq(a.name, q) ? 1 : 0;
-    const bx = eq(b.name, q) ? 1 : 0;
-    if (ax !== bx) return bx - ax;  // exact match to top
-    return b.__s - a.__s;           // otherwise by score
-  });
-
-  const products = filtered.slice(0, size).map(({ __s, ...rest }) => rest);
-
-  const payload = {
-    products,
-    categories: ['All', ...CATEGORIES],
-    ...(debug ? {
-      debug: {
-        input: { q, category, size, source, strict },
-        counts: { off: offResults.length, fallback: fallbackList.length, final: products.length },
-        used: { v2: usedV2, v1: usedV1 },
-        top5: filtered.slice(0, Math.min(5, filtered.length)).map(x => ({
-          name: x.name, brand: x.brand, source: x.source, score: Number(x.__s.toFixed(3))
-        })),
-      }
-    } : {})
-  };
-
-  cacheSet(cacheKey, payload);
-  return NextResponse.json(payload, { headers: { 'Cache-Control': 'private, max-age=30' } });
+  return NextResponse.json({ products: filtered });
 }
