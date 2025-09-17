@@ -1,74 +1,67 @@
 // src/utils/parseReceipt.js
 import { searchFallbackFoods } from '../data/fallbackFoods';
 
-// 1. Parse raw text into structured items
-export function parseReceiptText(raw) {
-  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+/* -------- Basic line parser -------- */
+export function parseReceiptText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-  const items = lines.map(line => {
-    // Try to capture "Name 200g" style
-    const match = line.match(/(.+?)\s+(\d+)\s*(g|ml|kg|l|pcs|pc|pack)?$/i);
-    if (match) {
-      let qty = parseInt(match[2], 10);
-      let unit = match[3] ? match[3].toLowerCase() : 'g';
+  const blacklist = [
+    /^🛒/i, /^date/i, /^item/i, /^total/i, /^amount/i,
+    /^rate/i, /^qty/i, /^customer/i
+  ];
 
-      // Normalize kg/l to g/ml
-      if (unit === 'kg') { qty *= 1000; unit = 'g'; }
-      if (unit === 'l') { qty *= 1000; unit = 'ml'; }
+  const items = [];
+  for (const line of lines) {
+    if (blacklist.some(re => re.test(line))) continue;
 
-      return { name: match[1].trim(), qty, unit };
+    // Extract quantity if present (e.g., "Basmati Rice (5kg)")
+    const qtyMatch = line.match(/(\d+)\s?(g|kg|ml|ltr|l|pack|x)/i);
+    let qty = 1, unit = 'count';
+    if (qtyMatch) {
+      qty = parseInt(qtyMatch[1]);
+      unit = qtyMatch[2].toLowerCase();
+      if (unit === 'kg') { qty = qty * 1000; unit = 'g'; }
+      if (unit === 'ltr' || unit === 'l') { qty = qty * 1000; unit = 'ml'; }
     }
-    return { name: line, qty: null, unit: null };
-  });
+
+    // Remove price if present
+    const cleanName = line.replace(/\d+(\.\d+)?/g, '').replace(/₹/g, '').trim();
+
+    items.push({ name: cleanName, qty, unit });
+  }
 
   return items;
 }
 
-// 2. Enrich with nutrition info
+/* -------- Enrich with OFF + fallback -------- */
 export async function enrichWithNutrition(items) {
   const enriched = [];
 
   for (const item of items) {
     try {
-      const res = await fetch(`/api/food-search?q=${encodeURIComponent(item.name)}&countries=india`);
+      const res = await fetch(`/api/food-search?q=${encodeURIComponent(item.name)}`);
       const data = await res.json();
+      let best = Array.isArray(data) && data.length > 0 ? data[0] : null;
 
-      if (Array.isArray(data) && data.length > 0) {
-        const best = data[0];
-        enriched.push({
-          ...item,
-          calories_per_100g: best.kcal_100g ?? null,
-          protein_100g: best.protein_100g ?? null,
-          carbs_100g: best.carbs_100g ?? null,
-          fat_100g: best.fat_100g ?? null,
-          brand: best.brand ?? null,
-          barcode: best.code ?? null,
-          source: 'off'
-        });
-        continue;
+      if (!best) {
+        // try fallback
+        const fallback = searchFallbackFoods(item.name);
+        if (fallback) best = fallback;
       }
 
-      // fallback
-      const fb = searchFallbackFoods(item.name);
-      if (fb.length > 0) {
-        enriched.push({
-          ...item,
-          calories_per_100g: fb[0].kcal_100g,
-          protein_100g: fb[0].protein_100g,
-          carbs_100g: fb[0].carbs_100g,
-          fat_100g: fb[0].fat_100g,
-          brand: fb[0].brand,
-          barcode: fb[0].code,
-          source: 'fallback'
-        });
-        continue;
-      }
-
-      // If nothing found
-      enriched.push({ ...item, calories_per_100g: null, source: 'none' });
+      enriched.push({
+        ...item,
+        brand: best?.brand || '',
+        barcode: best?.code || '',
+        calories_per_100g: best?.kcal_100g || '',
+        protein_100g: best?.protein_100g || '',
+        carbs_100g: best?.carbs_100g || '',
+        fat_100g: best?.fat_100g || '',
+        source: best ? (best.fallback ? 'fallback' : 'OFF') : 'none'
+      });
     } catch (err) {
-      console.error('Nutrition lookup failed:', err);
-      enriched.push({ ...item, calories_per_100g: null, source: 'error' });
+      console.error('Nutrition lookup failed', err);
+      enriched.push({ ...item, source: 'error' });
     }
   }
 
