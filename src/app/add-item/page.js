@@ -1,10 +1,9 @@
-// src/app/add-item/page.js
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { BrowserMultiFormatReader } from '@zxing/library';
-import { parseReceiptText } from '../../utils/parseReceipt';
+import { parseReceiptText, enrichWithNutrition } from '../../utils/parseReceipt';
 
 /* ---------------- AI Expiry Helpers ---------------- */
 function daysFromNow(d) {
@@ -201,28 +200,15 @@ export default function AddItem() {
     setParsing(true);
     const items = parseReceiptText(receiptText);
 
-    const enriched = [];
-    for (const item of items) {
-      try {
-        const res = await fetch(`/api/food-search?q=${encodeURIComponent(item.name)}`);
-        const data = await res.json();
-        const best = Array.isArray(data) && data.length > 0 ? data[0] : null;
+    const enriched = await enrichWithNutrition(items);
 
-        enriched.push({
-          ...item,
-          brand: best?.brand || '',
-          barcode: best?.code || '',
-          kcal: best?.kcal_100g || '',
-          protein: best?.protein_100g || '',
-          carbs: best?.carbs_100g || '',
-          fat: best?.fat_100g || '',
-          expiry: daysFromNow(shelfLifeDaysFor(item.name))
-        });
-      } catch {
-        enriched.push({ ...item, kcal: '', protein: '', carbs: '', fat: '', expiry: '' });
-      }
-    }
-    setParsedItems(enriched);
+    // add expiry for each
+    const withExpiry = enriched.map(p => ({
+      ...p,
+      expiry: daysFromNow(shelfLifeDaysFor(p.name))
+    }));
+
+    setParsedItems(withExpiry);
     setParsing(false);
   }
 
@@ -234,11 +220,11 @@ export default function AddItem() {
       name: p.name,
       quantity: p.qty,
       unit: p.unit,
-      calories_per_100g: Number(p.kcal) || 0,
+      calories_per_100g: Number(p.calories_per_100g) || 0,
       expiry_date: p.expiry,
-      protein_100g: p.protein !== '' ? Number(p.protein) : null,
-      carbs_100g: p.carbs !== '' ? Number(p.carbs) : null,
-      fat_100g: p.fat !== '' ? Number(p.fat) : null,
+      protein_100g: p.protein_100g !== '' ? Number(p.protein_100g) : null,
+      carbs_100g: p.carbs_100g !== '' ? Number(p.carbs_100g) : null,
+      fat_100g: p.fat_100g !== '' ? Number(p.fat_100g) : null,
       brand: p.brand || null,
       barcode: p.barcode || null,
     }));
@@ -412,8 +398,8 @@ export default function AddItem() {
                     <div>
                       <div className="item-title">{p.name}</div>
                       <div className="item-sub">
-                        {p.qty} {p.unit} • {p.kcal || '—'} kcal/100g •
-                        P {p.protein || '—'}g C {p.carbs || '—'}g F {p.fat || '—'}g
+                        {p.qty} {p.unit} • {p.calories_per_100g || '—'} kcal/100g •
+                        P {p.protein_100g || '—'}g C {p.carbs_100g || '—'}g F {p.fat_100g || '—'}g
                         • Exp: {p.expiry || '—'}
                       </div>
                     </div>
