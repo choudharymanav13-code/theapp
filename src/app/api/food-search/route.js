@@ -107,6 +107,5 @@ export async function GET(req) {
   }
 
   // 3) Default: return staples
-  const staplesDefault = searchFallbackFoods('', null, pageSize);
-  return NextResponse.json(staplesDefault);
+  return NextResponse.json([]);
 }
