@@ -1,32 +1,30 @@
 // src/utils/parseReceipt.js
-// Simple parser: split lines, try to detect name, qty, and unit
+// Very basic parser to split receipt lines into { name, qty, unit }
 export function parseReceiptText(text) {
-  const lines = (text || "")
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
+  const lines = (text || '').split(/\n+/).map(l => l.trim()).filter(Boolean);
+  const items = [];
 
-  const items = lines.map(line => {
-    // Match "Name 200g" or "Name 500 ml" or "Maggi 2 pack"
-    const match = line.match(/(.+?)\s+(\d+)\s*(g|ml|kg|ltr|pack|pcs|count)?$/i);
+  for (const line of lines) {
+    // Try to capture "200g", "500 ml", "2 pack" etc.
+    const match = line.match(/(.+?)\s+(\d+)\s*(g|kg|ml|l|pack|pcs|piece|count)?$/i);
     if (match) {
       let [, name, qty, unit] = match;
-      qty = Number(qty);
-      unit = unit ? normalizeUnit(unit) : "count";
-      return { name: name.trim(), qty, unit };
+      name = name.trim();
+      qty = parseInt(qty, 10);
+      unit = (unit || 'g').toLowerCase();
+
+      // Normalize units
+      if (unit === 'kg') { qty = qty * 1000; unit = 'g'; }
+      if (unit === 'l') { qty = qty * 1000; unit = 'ml'; }
+      if (['pcs', 'piece'].includes(unit)) { unit = 'count'; }
+      if (unit === 'pack') { unit = 'count'; }
+
+      items.push({ name, qty, unit });
+    } else {
+      // fallback: no qty/unit found
+      items.push({ name: line, qty: 1, unit: 'count' });
     }
-    return { name: line, qty: 1, unit: "count" }; // fallback
-  });
+  }
 
   return items;
-}
-
-function normalizeUnit(u) {
-  u = u.toLowerCase();
-  if (u === "g" || u === "gram" || u === "grams") return "g";
-  if (u === "kg") return "g";
-  if (u === "ml" || u === "milliliter") return "ml";
-  if (u === "ltr" || u === "liter" || u === "litre") return "ml";
-  if (u === "pack" || u === "pcs" || u === "count") return "count";
-  return "count";
 }
