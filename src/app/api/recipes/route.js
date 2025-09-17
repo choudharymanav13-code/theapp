@@ -1,51 +1,45 @@
-// src/app/api/recipes/route.js
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-// Load recipes.json once at startup
-const recipesFile = path.join(process.cwd(), 'src', 'data', 'recipes.json');
-let RECIPES = [];
-try {
-  RECIPES = JSON.parse(fs.readFileSync(recipesFile, 'utf8'));
-} catch (err) {
-  console.error('Failed to load recipes.json', err);
-  RECIPES = [];
-}
-
-// Simple fuzzy match helper
-function matchesPantry(ingredientName, pantryNames) {
-  const ing = ingredientName.toLowerCase();
-  return pantryNames.some(p => ing.includes(p.toLowerCase()) || p.toLowerCase().includes(ing));
-}
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const inventory = searchParams.getAll('inventory[]'); // array of pantry names
+  try {
+    // parse inventory[] query params
+    const { searchParams } = new URL(req.url);
+    const inventory = searchParams.getAll("inventory[]").map(i => i.toLowerCase());
 
-  const recipes = RECIPES.map(r => {
-    const required = r.ingredients?.length || 0;
+    // load recipes.json
+    const filePath = path.join(process.cwd(), "src", "data", "recipes.json");
+    const data = fs.readFileSync(filePath, "utf8");
+    const recipes = JSON.parse(data);
 
-    // how many ingredients user has
-    let match = 0;
-    if (inventory.length > 0) {
-      for (const ing of r.ingredients || []) {
-        if (matchesPantry(ing.name, inventory)) {
-          match++;
-        }
-      }
+    // if no inventory passed, return top 20 random recipes
+    if (!inventory || inventory.length === 0) {
+      return NextResponse.json(recipes.slice(0, 20));
     }
 
-    return {
-      ...r,
-      required_count: required,
-      match_count: match,
-    };
-  });
+    // match scoring
+    const scored = recipes.map(r => {
+      let matchCount = 0;
+      r.ingredients.forEach(ing => {
+        const ingName = ing.name.toLowerCase();
+        if (inventory.some(inv => ingName.includes(inv) || inv.includes(ingName))) {
+          matchCount++;
+        }
+      });
+      return {
+        ...r,
+        match_count: matchCount,
+        required_count: r.ingredients.length
+      };
+    });
 
-  // If inventory provided → sort by best matches
-  // Otherwise → just return all
-  recipes.sort((a, b) => (b.match_count || 0) - (a.match_count || 0));
+    // sort by highest matches first
+    scored.sort((a, b) => (b.match_count || 0) - (a.match_count || 0));
 
-  return NextResponse.json(recipes);
+    return NextResponse.json(scored.slice(0, 50)); // cap at 50
+  } catch (err) {
+    console.error("recipes api error", err);
+    return NextResponse.json({ error: "failed to load recipes" }, { status: 500 });
+  }
 }
