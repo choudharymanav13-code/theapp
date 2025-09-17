@@ -2,151 +2,147 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import Link from 'next/link';
 
-export default function Home() {
+export default function HomePage() {
   const [session, setSession] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
+  const [inventory, setInventory] = useState([]);
+  const [expiringSoon, setExpiringSoon] = useState([]);
 
   useEffect(() => {
-    // check session
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
-
-    // subscribe to changes
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
     });
-
     return () => listener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (session) fetchItems();
+    if (!session) return;
+    loadInventory();
   }, [session]);
 
-  async function fetchItems() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  async function loadInventory() {
     const { data, error } = await supabase
       .from('items')
       .select('*')
-      .eq('user_id', user.id)
-      .order('expiry_date', { ascending: true });
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    if (!error) setItems(data || []);
-    setLoading(false);
-  }
-
-  async function signInWithMagicLink(e) {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true },
-    });
-    if (error) alert(error.message);
-    else alert('Check your email for a magic link!');
-  }
-
-  function totalCalories() {
-    return items.reduce((sum, i) => {
-      const qtyFactor = i.unit === 'g' || i.unit === 'ml'
-        ? (i.quantity / 100)
-        : i.quantity;
-      return sum + (i.calories_per_100g || 0) * qtyFactor;
-    }, 0);
-  }
-
-  function expiringSoon() {
-    const today = new Date();
-    const soon = new Date();
-    soon.setDate(today.getDate() + 3);
-    return items.filter(i => new Date(i.expiry_date) <= soon).length;
+    if (!error && data) {
+      setInventory(data);
+      // filter items expiring in next 7 days
+      const soon = data.filter(i => {
+        const daysLeft = (new Date(i.expiry_date) - new Date()) / (1000 * 60 * 60 * 24);
+        return daysLeft >= 0 && daysLeft <= 7;
+      });
+      setExpiringSoon(soon);
+    }
   }
 
   if (!session) {
-    // ------------------ LOGIN PAGE ------------------
+    // show login page
     return (
-      <div style={{ background: '#111827', minHeight: '100vh', color: '#f9fafb',
-        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <form onSubmit={signInWithMagicLink} style={{ background: '#1f2937', padding: 24, borderRadius: 12, width: 320 }}>
-          <h1 style={{ fontSize: '1.3rem', marginBottom: 16 }}>Login to Pantry Coach</h1>
-          <input
-            type="email"
-            required
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input"
-            style={{ width: '100%', padding: 10, marginBottom: 12, borderRadius: 6, border: '1px solid #374151', background: '#111827', color: 'white' }}
-          />
-          <button type="submit" className="btn primary" style={{ width: '100%', padding: 10, borderRadius: 6, background: '#2563eb', color: 'white' }}>
-            Send Magic Link
-          </button>
-        </form>
+      <div className="card" style={{ marginTop: 80 }}>
+        <h2>Login</h2>
+        <p>Enter your email to receive a magic link.</p>
+        <LoginForm />
       </div>
     );
   }
 
-  // ------------------ DASHBOARD ------------------
+  // Dashboard view
   return (
-    <div style={{ background: '#111827', minHeight: '100vh', color: '#f9fafb' }}>
-      <div className="header" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Pantry Coach</h1>
-        <button
-          onClick={() => supabase.auth.signOut()}
-          style={{ padding: '6px 12px', borderRadius: 6, background: '#374151', color: 'white', border: 'none' }}
-        >
-          Sign Out
-        </button>
+    <div className="dashboard" style={{ padding: '16px', color: '#f9fafb', background: '#111827', minHeight: '100vh' }}>
+      <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>
+        👋 Welcome back
+      </h1>
+      <p style={{ color: '#9ca3af', marginBottom: '20px' }}>
+        {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
+      </p>
+
+      {/* Quick stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Inventory</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{inventory.length}</div>
+        </div>
+        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Expiring Soon</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{expiringSoon.length}</div>
+        </div>
+        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Calories Today</div>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>—</div>
+        </div>
       </div>
 
-      <div className="content" style={{ padding: 20, display: 'grid', gap: 20 }}>
-        {/* Stats */}
-        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
-            <div className="small">📦 Total items</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{items.length}</div>
-          </div>
-          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
-            <div className="small">⏳ Expiring soon</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{expiringSoon()}</div>
-          </div>
-          <div style={{ background: '#1f2937', padding: 16, borderRadius: 12 }}>
-            <div className="small">🔥 Pantry calories</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalCalories()}</div>
+      {/* Quick actions */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+        <a href="/add-item" className="btn primary" style={{ flex: 1, textAlign: 'center' }}>➕ Add Item</a>
+        <a href="/recipes" className="btn" style={{ flex: 1, textAlign: 'center' }}>🍲 Recipes</a>
+        <a href="/log-meal" className="btn" style={{ flex: 1, textAlign: 'center' }}>🍽 Log Meal</a>
+      </div>
+
+      {/* Expiring soon */}
+      {expiringSoon.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>⚠️ Expiring Soon</h2>
+          <div style={{ display: 'grid', gap: '8px' }}>
+            {expiringSoon.map(item => (
+              <div key={item.id} style={{ background: '#1f2937', padding: '10px', borderRadius: '8px' }}>
+                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                  Expires on {new Date(item.expiry_date).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Actions */}
-        <Link href="/add-item" className="btn primary" style={{ textAlign: 'center', background: '#2563eb', color: 'white', padding: '12px 16px', borderRadius: 8, textDecoration: 'none' }}>
-          ➕ Add Item
-        </Link>
-
-        {/* Recent items */}
-        <div style={{ background: '#1f2937', borderRadius: 12, padding: 16 }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: 8 }}>Recent items</h2>
-          {loading ? (
-            <div className="small">Loading…</div>
-          ) : items.length === 0 ? (
-            <div className="small">No items yet. Add something!</div>
-          ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {items.slice(0, 5).map(i => (
-                <li key={i.id} style={{ padding: '6px 0', borderBottom: '1px solid #374151' }}>
-                  <div style={{ fontWeight: '500' }}>{i.name}</div>
-                  <div className="small" style={{ color: '#9ca3af' }}>
-                    {i.quantity}{i.unit} • {i.calories_per_100g} kcal/100g • Exp {i.expiry_date}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+      {/* Recently added */}
+      <div>
+        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>🆕 Recently Added</h2>
+        <div style={{ display: 'grid', gap: '8px' }}>
+          {inventory.map(item => (
+            <div key={item.id} style={{ background: '#1f2937', padding: '10px', borderRadius: '8px' }}>
+              <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+              <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                {item.calories_per_100g} kcal/100g • Expires {new Date(item.expiry_date).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
+  );
+}
+
+// Minimal login form (client-side email magic link)
+function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) alert(error.message);
+    else setSent(true);
+  }
+
+  if (sent) return <p>✅ Check your email for the magic link!</p>;
+
+  return (
+    <form onSubmit={handleLogin} style={{ display: 'grid', gap: '10px' }}>
+      <input
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        required
+        className="input"
+      />
+      <button type="submit" className="btn primary">Send Magic Link</button>
+    </form>
   );
 }
