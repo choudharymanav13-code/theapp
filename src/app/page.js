@@ -5,12 +5,28 @@ import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 
 export default function Home() {
+  const [session, setSession] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    fetchItems();
+    // check session
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    // subscribe to changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (session) fetchItems();
+  }, [session]);
 
   async function fetchItems() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -23,6 +39,16 @@ export default function Home() {
 
     if (!error) setItems(data || []);
     setLoading(false);
+  }
+
+  async function signInWithMagicLink(e) {
+    e.preventDefault();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) alert(error.message);
+    else alert('Check your email for a magic link!');
   }
 
   function totalCalories() {
@@ -41,10 +67,41 @@ export default function Home() {
     return items.filter(i => new Date(i.expiry_date) <= soon).length;
   }
 
+  if (!session) {
+    // ------------------ LOGIN PAGE ------------------
+    return (
+      <div style={{ background: '#111827', minHeight: '100vh', color: '#f9fafb',
+        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <form onSubmit={signInWithMagicLink} style={{ background: '#1f2937', padding: 24, borderRadius: 12, width: 320 }}>
+          <h1 style={{ fontSize: '1.3rem', marginBottom: 16 }}>Login to Pantry Coach</h1>
+          <input
+            type="email"
+            required
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input"
+            style={{ width: '100%', padding: 10, marginBottom: 12, borderRadius: 6, border: '1px solid #374151', background: '#111827', color: 'white' }}
+          />
+          <button type="submit" className="btn primary" style={{ width: '100%', padding: 10, borderRadius: 6, background: '#2563eb', color: 'white' }}>
+            Send Magic Link
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // ------------------ DASHBOARD ------------------
   return (
     <div style={{ background: '#111827', minHeight: '100vh', color: '#f9fafb' }}>
-      <div className="header" style={{ padding: '16px 20px' }}>
+      <div className="header" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Pantry Coach</h1>
+        <button
+          onClick={() => supabase.auth.signOut()}
+          style={{ padding: '6px 12px', borderRadius: 6, background: '#374151', color: 'white', border: 'none' }}
+        >
+          Sign Out
+        </button>
       </div>
 
       <div className="content" style={{ padding: 20, display: 'grid', gap: 20 }}>
