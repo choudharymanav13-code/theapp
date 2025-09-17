@@ -7,6 +7,8 @@ export default function HomePage() {
   const [session, setSession] = useState(null);
   const [inventory, setInventory] = useState([]);
   const [expiringSoon, setExpiringSoon] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [daysWindow, setDaysWindow] = useState(7); // adjustable expiring soon window
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -19,9 +21,10 @@ export default function HomePage() {
   useEffect(() => {
     if (!session) return;
     loadInventory();
-  }, [session]);
+  }, [session, daysWindow]);
 
   async function loadInventory() {
+    setLoading(true);
     const { data, error } = await supabase
       .from('items')
       .select('*')
@@ -30,13 +33,14 @@ export default function HomePage() {
 
     if (!error && data) {
       setInventory(data);
-      // filter items expiring in next 7 days
+      // filter items expiring soon based on adjustable window
       const soon = data.filter(i => {
         const daysLeft = (new Date(i.expiry_date) - new Date()) / (1000 * 60 * 60 * 24);
-        return daysLeft >= 0 && daysLeft <= 7;
+        return daysLeft >= 0 && daysLeft <= daysWindow;
       });
       setExpiringSoon(soon);
     }
+    setLoading(false);
   }
 
   if (!session) {
@@ -52,28 +56,17 @@ export default function HomePage() {
 
   // Dashboard view
   return (
-    <div className="dashboard" style={{ padding: '16px', color: '#f9fafb', background: '#111827', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>
-        👋 Welcome back
-      </h1>
-      <p style={{ color: '#9ca3af', marginBottom: '20px' }}>
+    <div className="dashboard" style={{ padding: '16px', minHeight: '100vh' }}>
+      <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>👋 Welcome back</h1>
+      <p className="small" style={{ marginBottom: '20px' }}>
         {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
       </p>
 
       {/* Quick stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
-          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Inventory</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{inventory.length}</div>
-        </div>
-        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
-          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Expiring Soon</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{expiringSoon.length}</div>
-        </div>
-        <div className="card" style={{ background: '#1f2937', padding: '12px', borderRadius: '12px' }}>
-          <div style={{ fontSize: '14px', color: '#9ca3af' }}>Calories Today</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>—</div>
-        </div>
+        <StatCard label="Inventory" value={loading ? '—' : inventory.length} />
+        <StatCard label="Expiring Soon" value={loading ? '—' : expiringSoon.length} />
+        <StatCard label="Calories Today" value="—" />
       </div>
 
       {/* Quick actions */}
@@ -84,36 +77,95 @@ export default function HomePage() {
       </div>
 
       {/* Expiring soon */}
-      {expiringSoon.length > 0 && (
-        <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>⚠️ Expiring Soon</h2>
-          <div style={{ display: 'grid', gap: '8px' }}>
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '16px' }}>⚠️ Expiring Soon</h2>
+          <select
+            className="input"
+            style={{ width: 'auto', fontSize: '12px', padding: '2px 6px' }}
+            value={daysWindow}
+            onChange={(e) => setDaysWindow(Number(e.target.value))}
+          >
+            <option value={3}>Next 3 days</option>
+            <option value={5}>Next 5 days</option>
+            <option value={7}>Next 7 days</option>
+            <option value={14}>Next 14 days</option>
+          </select>
+        </div>
+        {loading ? (
+          <SkeletonList count={2} />
+        ) : expiringSoon.length > 0 ? (
+          <div className="list" style={{ marginTop: 8 }}>
             {expiringSoon.map(item => (
-              <div key={item.id} style={{ background: '#1f2937', padding: '10px', borderRadius: '8px' }}>
-                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                  Expires on {new Date(item.expiry_date).toLocaleDateString()}
+              <div key={item.id} className="list-item">
+                <div>
+                  <div className="item-title">{item.name}</div>
+                  <div className="item-sub">
+                    Expires {new Date(item.expiry_date).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="small">No items expiring soon 🎉</p>
+        )}
+      </div>
 
       {/* Recently added */}
-      <div>
-        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>🆕 Recently Added</h2>
-        <div style={{ display: 'grid', gap: '8px' }}>
-          {inventory.map(item => (
-            <div key={item.id} style={{ background: '#1f2937', padding: '10px', borderRadius: '8px' }}>
-              <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-              <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                {item.calories_per_100g} kcal/100g • Expires {new Date(item.expiry_date).toLocaleDateString()}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '16px' }}>🆕 Recently Added</h2>
+          <a href="/inventory" className="small">View All →</a>
+        </div>
+        {loading ? (
+          <SkeletonList count={3} />
+        ) : inventory.length > 0 ? (
+          <div className="list" style={{ marginTop: 8 }}>
+            {inventory.map(item => (
+              <div key={item.id} className="list-item">
+                <div>
+                  <div className="item-title">{item.name}</div>
+                  <div className="item-sub">
+                    {item.calories_per_100g} kcal/100g • Expires {new Date(item.expiry_date).toLocaleDateString()}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        ) : (
+          <p className="small">No items yet. Add your first one!</p>
+        )}
+      </div>
+
+      {/* Recipes teaser */}
+      <div style={{ marginBottom: '20px' }}>
+        <h2 style={{ fontSize: '16px' }}>🍲 Suggested Recipes</h2>
+        <div className="card" style={{ marginTop: 8 }}>
+          <p className="small">Recipe suggestions will appear here (Phase 4).  
+          Based on your inventory, we’ll show Indian + global dishes you can cook.</p>
+          <a href="/recipes" className="btn primary" style={{ marginTop: 10 }}>Explore Recipes</a>
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }) {
+  return (
+    <div className="card" style={{ textAlign: 'center', padding: '12px', borderRadius: '12px' }}>
+      <div className="small">{label}</div>
+      <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{value}</div>
+    </div>
+  );
+}
+
+function SkeletonList({ count = 3 }) {
+  return (
+    <div className="list" style={{ marginTop: 8 }}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="skeleton" style={{ height: '40px' }} />
+      ))}
     </div>
   );
 }
