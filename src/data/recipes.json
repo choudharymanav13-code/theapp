@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "Aloo Sabzi",
+    "cuisine": "Indian",
+    "ingredients": ["Potatoes", "Onion", "Tomato", "Green chili", "Turmeric", "Salt", "Oil"],
+    "instructions": "Peel and cube potatoes. Sauté onion, tomato, and chili in oil with turmeric. Add potatoes, cook until tender.",
+    "servings": 2,
+    "time_minutes": 25
+  },
+  {
+    "id": 2,
+    "name": "Dal Tadka",
+    "cuisine": "Indian",
+    "ingredients": ["Toor dal", "Onion", "Tomato", "Garlic", "Ghee", "Cumin seeds", "Chili"],
+    "instructions": "Cook dal until soft. In ghee, fry cumin, garlic, onion, tomato, and chili. Mix into dal and simmer.",
+    "servings": 3,
+    "time_minutes": 30
+  },
+  {
+    "id": 3,
+    "name": "Paneer Butter Masala",
+    "cuisine": "Indian",
+    "ingredients": ["Paneer", "Butter", "Tomato puree", "Onion", "Cream", "Spices"],
+    "instructions": "Cook onion and tomato puree with spices. Add butter, cream, and paneer cubes. Simmer until thick.",
+    "servings": 3,
+    "time_minutes": 35
+  },
+  {
+    "id": 4,
+    "name": "Chana Masala",
+    "cuisine": "Indian",
+    "ingredients": ["Chickpeas", "Onion", "Tomato", "Ginger", "Garlic", "Masala spices"],
+    "instructions": "Cook chickpeas. Prepare onion-tomato base with spices. Mix in chickpeas and simmer.",
+    "servings": 4,
+    "time_minutes": 40
+  },
+  {
+    "id": 5,
+    "name": "Vegetable Pulao",
+    "cuisine": "Indian",
+    "ingredients": ["Rice", "Mixed vegetables", "Onion", "Green chili", "Whole spices", "Ghee"],
+    "instructions": "Sauté onion, chili, and spices in ghee. Add vegetables and rice. Cook with water until fluffy.",
+    "servings": 3,
+    "time_minutes": 30
+  },
+  {
+    "id": 6,
+    "name": "Masoor Dal",
+    "cuisine": "Indian",
+    "ingredients": ["Masoor dal", "Onion", "Tomato", "Garlic", "Turmeric", "Oil"],
+    "instructions": "Cook dal with turmeric. Fry onion, garlic, and tomato in oil. Mix into dal.",
+    "servings": 3,
+    "time_minutes": 25
+  },
+  {
+    "id": 7,
+    "name": "Bhindi Fry",
+    "cuisine": "Indian",
+    "ingredients": ["Okra", "Onion", "Tomato", "Chili powder", "Turmeric", "Oil"],
+    "instructions": "Slice and fry okra until half done. Add onion, tomato, and spices. Cook until crisp.",
+    "servings": 2,
+    "time_minutes": 20
+  },
+  {
+    "id": 8,
+    "name": "Cabbage Sabzi",
+    "cuisine": "Indian",
+    "ingredients": ["Cabbage", "Onion", "Green chili", "Turmeric", "Mustard seeds", "Oil"],
+    "instructions": "Shred cabbage. Fry mustard seeds, onion, and chili. Add cabbage and turmeric, cook until soft.",
+    "servings": 2,
+    "time_minutes": 15
+  },
+  {
+    "id": 9,
+    "name": "Palak Paneer",
+    "cuisine": "Indian",
+    "ingredients": ["Spinach", "Paneer", "Onion", "Tomato", "Garlic", "Spices", "Cream"],
+    "instructions": "Blanch spinach and puree. Cook onion, tomato, and garlic with spices. Add spinach puree and paneer.",
+    "servings": 3,
+    "time_minutes": 35
+  },
+  {
+    "id": 10,
+    "name": "Aloo Gobi",
+    "cuisine": "Indian",
+    "ingredients": ["Potato", "Cauliflower", "Onion", "Tomato", "Ginger", "Spices"],
+    "instructions": "Cook potato and cauliflower with onion, tomato, ginger, and spices until tender.",
+    "servings": 3,
+    "time_minutes": 30
+  }
+]
