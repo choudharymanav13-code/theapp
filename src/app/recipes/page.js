@@ -34,6 +34,38 @@ export default function RecipesList() {
     setLoading(false);
   }
 
+  async function cookRecipe(recipe) {
+    if (!confirm(`Cook "${recipe.title}"?\nThis will deduct ingredients from your pantry.`)) {
+      return;
+    }
+
+    const res = await fetch('/api/recipes/cook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipeId: recipe.id })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      alert(`Error: ${data.error}`);
+      return;
+    }
+
+    for (const ing of data.ingredients) {
+      const r = await fetch('/api/inventory/deduct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ing)
+      });
+      const result = await r.json();
+      if (result.error) {
+        console.warn('Deduct error', result.error);
+      }
+    }
+
+    alert(`Cooked ${recipe.title}! Inventory updated.`);
+  }
+
   return (
     <div style={{ padding: 16 }}>
       <h1>Recipes</h1>
@@ -48,16 +80,21 @@ export default function RecipesList() {
                     <div className="small">{r.cuisine} • Serves {r.servings} • {r.nutrition?.kcal} kcal</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 18, fontWeight: 700 }}>{r.match_count ?? '-'}/{r.required_count ?? r.ingredients.length}</div>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>
+                      {r.match_count ?? '-'}/{r.required_count ?? r.ingredients.length}
+                    </div>
                     <div className="small">Have ingredients</div>
                   </div>
                 </div>
                 <div style={{ marginTop: 8 }}>
                   <Link href={`/recipes/${r.id}`} className="btn">View</Link>
-                  <button className="btn" style={{ marginLeft: 8 }} onClick={async () => {
-                    // optimistic: go to detail page and cook there
-                    window.location.href = `/recipes/${r.id}`;
-                  }}>Cook Now</button>
+                  <button
+                    className="btn"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => cookRecipe(r)}
+                  >
+                    Cook Now
+                  </button>
                 </div>
               </div>
             ))}
