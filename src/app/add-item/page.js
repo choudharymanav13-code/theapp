@@ -83,10 +83,13 @@ export default function AddItem() {
   const codeReaderRef = useRef(null);
 
   /* -------- Effects: search -------- */
-  useEffect(() => {
-    // When dq updates, fire search. If empty -> default staples from API
+useEffect(() => {
+  if (dq && dq.trim().length >= 2) {
     fetchFoods(dq);
-  }, [dq, widen]);
+  } else {
+    setResults([]); // show nothing when empty
+  }
+}, [dq, widen]);
 
   /* -------- Backend call to unified food-search -------- */
   async function fetchFoods(qStr = '', barcodeParam = '') {
