@@ -1,5 +1,5 @@
 // public/sw.js
-const CACHE = 'pantry-coach-v4';
+const CACHE = 'pantry-coach-v5';
 const ASSETS = ['/', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
