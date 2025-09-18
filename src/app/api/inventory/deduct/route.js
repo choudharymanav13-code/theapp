@@ -21,7 +21,11 @@ function normalize(qty, unit) {
 
 // simplified name for fuzzy match
 function simplifyName(s = '') {
-  return String(s).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\bs\b/g, '').trim();
+  return String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\bs\b/g, '')
+    .trim();
 }
 
 export async function POST(req) {
@@ -30,10 +34,16 @@ export async function POST(req) {
     const { name, qty, unit, user_id } = body || {};
 
     if (!name || !qty) {
-      return NextResponse.json({ error: 'missing name or qty in request body' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'missing name or qty in request body' },
+        { status: 400 }
+      );
     }
     if (!user_id) {
-      return NextResponse.json({ error: 'missing user_id (pass current user id in request body)' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'missing user_id (pass current user id in request body)' },
+        { status: 400 }
+      );
     }
 
     const norm = normalize(qty, unit);
@@ -59,30 +69,37 @@ export async function POST(req) {
       if (e2) throw e2;
 
       const target = simplifyName(name);
-      const candidate = (allItems || []).find(it => {
+      const candidate = (allItems || []).find((it) => {
         const s = simplifyName(it.name);
-        return s.includes(target) || target.includes(s) || s.split(' ')[0] === target.split(' ')[0];
+        return (
+          s.includes(target) ||
+          target.includes(s) ||
+          s.split(' ')[0] === target.split(' ')[0]
+        );
       });
 
       if (candidate) items = [candidate];
     }
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: `no pantry match for "${name}"` }, { status: 404 });
+      return NextResponse.json(
+        { error: `no pantry match for "${name}"` },
+        { status: 404 }
+      );
     }
 
     const item = items[0];
 
-    // compute new quantity (assumes item.quantity stored in same unit as we normalize to, else you may need convert)
+    // compute new quantity
     const currentQty = Number(item.quantity) || 0;
     let newQty = currentQty - norm.qty;
     if (Number.isNaN(newQty)) newQty = 0;
     if (newQty < 0) newQty = 0;
 
-    // update DB
+    // update DB (keep normalized unit)
     const { error: updateErr } = await supabase
       .from('items')
-      .update({ quantity: newQty })
+      .update({ quantity: newQty, unit: norm.unit || item.unit })
       .eq('id', item.id);
 
     if (updateErr) throw updateErr;
@@ -90,10 +107,14 @@ export async function POST(req) {
     return NextResponse.json({
       message: `deducted ${norm.qty}${norm.unit || ''} from ${item.name}`,
       remaining: newQty,
-      item_id: item.id
+      unit: norm.unit || item.unit,
+      item_id: item.id,
     });
   } catch (err) {
     console.error('inventory.deduct error:', err);
-    return NextResponse.json({ error: err.message || 'internal error' }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || 'internal error' },
+      { status: 500 }
+    );
   }
 }
