@@ -28,8 +28,7 @@ export default function BottomNav() {
       <Link href="/recipes" style={{ color: '#f9fafb' }}>Recipes</Link>
       <Link href="/log-meal" style={{ color: '#f9fafb' }}>Log Meal</Link>
       <Link href="/profile" style={{ color: '#f9fafb' }}>Profile</Link>
-      <Link href="/cook-history" aria-label="Cook History">History</a>
-
+      <Link href="/cook-history" style={{ color: '#f9fafb' }}>History</Link>
     </nav>
   );
 }
