@@ -56,6 +56,8 @@ export async function POST(req) {
 
     if (error) throw error;
 
+    let matchedWith = null;
+
     // fallback fuzzy
     if (!items || items.length === 0) {
       const { data: allItems, error: e2 } = await supabase
@@ -73,9 +75,11 @@ export async function POST(req) {
       candidates.sort((a, b) => b.score - a.score);
 
       if (candidates[0] && candidates[0].score > 0.3) {
-        // threshold: at least 30% overlap
         items = [candidates[0]];
+        matchedWith = candidates[0].name;
       }
+    } else {
+      matchedWith = items[0].name;
     }
 
     if (!items || items.length === 0) {
@@ -100,25 +104,4 @@ export async function POST(req) {
     if (updateErr) throw updateErr;
 
     return NextResponse.json({
-      message: `deducted ${norm.qty}${norm.unit} from ${item.name}`,
-      remaining: newQty,
-      item_id: item.id,
-      deleted: newQty === 0,
-    });
-  } catch (err) {
-    console.error('inventory.deduct error:', err);
-    return NextResponse.json(
-      { error: err.message || 'internal error' },
-      { status: 500 }
-    );
-  }
-}
-
-// simple overlap score
-function jaccardScore(aTokens, bTokens) {
-  const setA = new Set(aTokens);
-  const setB = new Set(bTokens);
-  const inter = [...setA].filter(x => setB.has(x));
-  const union = new Set([...setA, ...setB]);
-  return inter.length / (union.size || 1);
-}
+      message: `Deducted ${norm.qty}${norm.unit} from "${matchedWith}" (for recipe ingredient "${name}"
