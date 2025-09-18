@@ -23,11 +23,13 @@ export default function BottomNav() {
       background: '#1f2937', display: 'flex', justifyContent: 'space-around',
       padding: '10px 0', borderTop: '1px solid #374151'
     }}>
-      <Link href="/" style={{ color: '#f9fafb' }}>🏠 Home</Link>
-      <Link href="/inventory" style={{ color: '#f9fafb' }}>📦 Inventory</Link>
-      <Link href="/recipes" style={{ color: '#f9fafb' }}>🍲 Recipes</Link>
-      <Link href="/log-meal" style={{ color: '#f9fafb' }}>🍽 Log Meal</Link>
-      <Link href="/profile" style={{ color: '#f9fafb' }}>👤 Profile</Link>
+      <Link href="/" style={{ color: '#f9fafb' }}>Home</Link>
+      <Link href="/inventory" style={{ color: '#f9fafb' }}>Inventory</Link>
+      <Link href="/recipes" style={{ color: '#f9fafb' }}>Recipes</Link>
+      <Link href="/log-meal" style={{ color: '#f9fafb' }}>Log Meal</Link>
+      <Link href="/profile" style={{ color: '#f9fafb' }}>Profile</Link>
+      <Link href="/cook-history" aria-label="Cook History">History</a>
+
     </nav>
   );
 }
