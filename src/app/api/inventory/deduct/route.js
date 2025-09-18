@@ -6,11 +6,10 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// normalize units to g/ml
+// normalize qty/unit to g/ml
 function normalize(qty, unit) {
   const q = Number(qty) || 0;
-  if (!unit) return { qty: q, unit: '' };
-  const u = String(unit).toLowerCase();
+  const u = (unit || '').toLowerCase();
   if (u === 'kg') return { qty: q * 1000, unit: 'g' };
   if (u === 'g') return { qty: q, unit: 'g' };
   if (u === 'l') return { qty: q * 1000, unit: 'ml' };
@@ -18,12 +17,19 @@ function normalize(qty, unit) {
   return { qty: q, unit };
 }
 
-// simplified name for fuzzy match
+// make name matching more flexible
 function simplifyName(s = '') {
-  return String(s).toLowerCase()
-    .replace(/[^a-z0-9 ]/g, '')
-    .replace(/\bs\b/g, '')
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
+}
+
+function tokenize(name = '') {
+  return simplifyName(name)
+    .split(' ')
+    .filter(Boolean);
 }
 
 export async function POST(req) {
@@ -31,16 +37,16 @@ export async function POST(req) {
     const body = await req.json();
     const { name, qty, unit, user_id } = body || {};
 
-    if (!name || !qty) {
-      return NextResponse.json({ error: 'missing name or qty' }, { status: 400 });
-    }
-    if (!user_id) {
-      return NextResponse.json({ error: 'missing user_id' }, { status: 400 });
+    if (!name || !qty || !user_id) {
+      return NextResponse.json(
+        { error: 'missing name, qty, or user_id' },
+        { status: 400 }
+      );
     }
 
     const norm = normalize(qty, unit);
 
-    // 1) Try direct ilike match
+    // try ilike exact first
     let { data: items, error } = await supabase
       .from('items')
       .select('*')
@@ -50,7 +56,7 @@ export async function POST(req) {
 
     if (error) throw error;
 
-    // 2) Fallback: fuzzy match
+    // fallback fuzzy
     if (!items || items.length === 0) {
       const { data: allItems, error: e2 } = await supabase
         .from('items')
@@ -59,60 +65,46 @@ export async function POST(req) {
 
       if (e2) throw e2;
 
-      const target = simplifyName(name);
-      const candidate = (allItems || []).find(it => {
-        const s = simplifyName(it.name);
-        return (
-          s.includes(target) ||
-          target.includes(s) ||
-          s.split(' ')[0] === target.split(' ')[0]
-        );
-      });
+      const targetTokens = tokenize(name);
+      const candidates = (allItems || []).map(it => ({
+        ...it,
+        score: jaccardScore(targetTokens, tokenize(it.name)),
+      }));
+      candidates.sort((a, b) => b.score - a.score);
 
-      if (candidate) items = [candidate];
+      if (candidates[0] && candidates[0].score > 0.3) {
+        // threshold: at least 30% overlap
+        items = [candidates[0]];
+      }
     }
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: `no pantry match for "${name}"` }, { status: 404 });
+      return NextResponse.json(
+        { error: `no pantry match for "${name}"` },
+        { status: 404 }
+      );
     }
 
     const item = items[0];
     const currentQty = Number(item.quantity) || 0;
     let newQty = currentQty - norm.qty;
-    if (Number.isNaN(newQty)) newQty = 0;
     if (newQty < 0) newQty = 0;
 
-    if (newQty === 0) {
-      // auto-delete item
-      const { error: delErr } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', item.id);
+    const update = newQty === 0 ? { quantity: 0 } : { quantity: newQty };
 
-      if (delErr) throw delErr;
+    const { error: updateErr } = await supabase
+      .from('items')
+      .update(update)
+      .eq('id', item.id);
 
-      return NextResponse.json({
-        message: `deducted ${norm.qty}${norm.unit || ''} from ${item.name} → now removed from pantry`,
-        remaining: 0,
-        item_id: item.id,
-        deleted: true
-      });
-    } else {
-      // update qty
-      const { error: updateErr } = await supabase
-        .from('items')
-        .update({ quantity: newQty })
-        .eq('id', item.id);
+    if (updateErr) throw updateErr;
 
-      if (updateErr) throw updateErr;
-
-      return NextResponse.json({
-        message: `deducted ${norm.qty}${norm.unit || ''} from ${item.name}`,
-        remaining: newQty,
-        item_id: item.id,
-        deleted: false
-      });
-    }
+    return NextResponse.json({
+      message: `deducted ${norm.qty}${norm.unit} from ${item.name}`,
+      remaining: newQty,
+      item_id: item.id,
+      deleted: newQty === 0,
+    });
   } catch (err) {
     console.error('inventory.deduct error:', err);
     return NextResponse.json(
@@ -120,4 +112,13 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}
+
+// simple overlap score
+function jaccardScore(aTokens, bTokens) {
+  const setA = new Set(aTokens);
+  const setB = new Set(bTokens);
+  const inter = [...setA].filter(x => setB.has(x));
+  const union = new Set([...setA, ...setB]);
+  return inter.length / (union.size || 1);
 }
