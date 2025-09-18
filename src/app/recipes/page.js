@@ -3,17 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export default function RecipesList() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inventoryNames, setInventoryNames] = useState([]);
-
-  // Filters
-  const [q, setQ] = useState('');
-  const [cuisine, setCuisine] = useState('');
-  const [calories, setCalories] = useState('');
-  const [suggest, setSuggest] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pendingRecipe, setPendingRecipe] = useState(null);
+  const [cooking, setCooking] = useState(false);
 
   useEffect(() => {
     loadInventoryNames();
@@ -21,7 +19,7 @@ export default function RecipesList() {
 
   useEffect(() => {
     fetchRecipes();
-  }, [inventoryNames, q, cuisine, calories, suggest]);
+  }, [inventoryNames]);
 
   async function loadInventoryNames() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -35,12 +33,8 @@ export default function RecipesList() {
     try {
       const params = new URLSearchParams();
       inventoryNames.forEach(n => params.append('inventory[]', n));
-      if (q) params.set('q', q);
-      if (cuisine) params.set('cuisine', cuisine);
-      if (calories) params.set('calories', calories);
-      if (suggest) params.set('suggest', 'true');
-
       const res = await fetch(`/api/recipes?${params.toString()}`);
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
       const j = await res.json();
       setRecipes(j);
     } catch (err) {
@@ -51,46 +45,59 @@ export default function RecipesList() {
     }
   }
 
+  function handleCook(recipe) {
+    setPendingRecipe(recipe);
+    setModalOpen(true);
+  }
+
+  async function confirmCook() {
+    if (!pendingRecipe) return;
+    setCooking(true);
+
+    try {
+      const res = await fetch('/api/recipes/cook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipeId: pendingRecipe.id }),
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        alert(`Error: ${data.error}`);
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const results = [];
+      for (const ing of data.ingredients) {
+        const r = await fetch('/api/inventory/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...ing, user_id: user.id }),
+        });
+        results.push(await r.json());
+      }
+
+      // summary
+      let summary = results.map(r =>
+        r.error ? `❌ ${r.error}` : `✅ ${r.message}`
+      ).join('\n');
+
+      alert(`Cooked ${pendingRecipe.title}!\n\n${summary}`);
+    } finally {
+      setCooking(false);
+      setModalOpen(false);
+      setPendingRecipe(null);
+    }
+  }
+
   return (
     <div style={{ padding: 16 }}>
       <h1>Recipes</h1>
-
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <input
-          className="input"
-          placeholder="Search recipes..."
-          value={q}
-          onChange={e => setQ(e.target.value)}
-          style={{ flex: 2 }}
-        />
-        <select className="input" value={cuisine} onChange={e => setCuisine(e.target.value)}>
-          <option value="">All cuisines</option>
-          <option value="indian">Indian</option>
-          <option value="italian">Italian</option>
-          <option value="mexican">Mexican</option>
-          <option value="chinese">Chinese</option>
-          <option value="global">Global</option>
-        </select>
-        <select className="input" value={calories} onChange={e => setCalories(e.target.value)}>
-          <option value="">Any kcal</option>
-          <option value="200">≤ 200</option>
-          <option value="500">≤ 500</option>
-          <option value="800">≤ 800</option>
-        </select>
-        <button
-          className={`btn ${suggest ? 'primary' : ''}`}
-          onClick={() => setSuggest(!suggest)}
-        >
-          {suggest ? 'Showing Suggestions' : 'Suggest Recipes'}
-        </button>
-      </div>
-
       <div style={{ marginTop: 12 }}>
         {loading ? (
           <div className="small">Loading…</div>
-        ) : recipes.length === 0 ? (
-          <div className="small">No recipes found. Try adjusting filters or add your own!</div>
         ) : (
           <div style={{ display: 'grid', gap: 12 }}>
             {recipes.map(r => (
@@ -106,11 +113,7 @@ export default function RecipesList() {
                     <div style={{ fontSize: 18, fontWeight: 700 }}>
                       {r.match_count ?? '-'}/{r.required_count ?? r.ingredients.length}
                     </div>
-                    <div className="small">
-                      {r.missing_count === 0
-                        ? 'Complete'
-                        : `${r.missing_count} missing`}
-                    </div>
+                    <div className="small">Have ingredients</div>
                   </div>
                 </div>
                 <div style={{ marginTop: 8 }}>
@@ -118,9 +121,10 @@ export default function RecipesList() {
                   <button
                     className="btn"
                     style={{ marginLeft: 8 }}
-                    onClick={() => (window.location.href = `/recipes/${r.id}`)}
+                    onClick={() => handleCook(r)}
+                    disabled={cooking}
                   >
-                    Cook Now
+                    {cooking && pendingRecipe?.id === r.id ? 'Cooking…' : 'Cook Now'}
                   </button>
                 </div>
               </div>
@@ -129,10 +133,13 @@ export default function RecipesList() {
         )}
       </div>
 
-      {/* Add Recipe Button */}
-      <div style={{ marginTop: 16 }}>
-        <Link href="/recipes/add" className="btn primary">+ Add Recipe</Link>
-      </div>
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={confirmCook}
+        items={pendingRecipe?.ingredients || []}
+      />
     </div>
   );
 }
