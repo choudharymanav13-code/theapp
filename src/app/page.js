@@ -1,200 +1,129 @@
+// src/app/page.js
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function HomePage() {
-  const [session, setSession] = useState(null);
-  const [inventory, setInventory] = useState([]);
-  const [expiringSoon, setExpiringSoon] = useState([]);
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [daysWindow, setDaysWindow] = useState(7); // adjustable expiring soon window
+  const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-    });
-    return () => listener.subscription.unsubscribe();
+    loadUserAndData();
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    loadInventory();
-  }, [session, daysWindow]);
-
-  async function loadInventory() {
+  async function loadUserAndData() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('items')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setUser(null); setLoading(false); return; }
+    setUser(user);
 
-    if (!error && data) {
-      setInventory(data);
-      // filter items expiring soon based on adjustable window
-      const soon = data.filter(i => {
-        const daysLeft = (new Date(i.expiry_date) - new Date()) / (1000 * 60 * 60 * 24);
-        return daysLeft >= 0 && daysLeft <= daysWindow;
-      });
-      setExpiringSoon(soon);
+    const { data:itemsData } = await supabase.from('items').select('*').order('expiry_date', { ascending: true }).limit(12);
+    setItems(itemsData || []);
+
+    // fetch quick recipe suggestions (inventory names)
+    const invNames = (itemsData || []).map(i => i.name).slice(0, 20);
+    const params = new URLSearchParams();
+    invNames.forEach(n => params.append('inventory[]', n));
+    const res = await fetch(`/api/recipes?${params.toString()}`);
+    if (res.ok) {
+      const j = await res.json();
+      setRecipes((j || []).slice(0, 4));
+    } else {
+      setRecipes([]);
     }
+
     setLoading(false);
   }
 
-  if (!session) {
-    // show login page
-    return (
-      <div className="card" style={{ marginTop: 80 }}>
-        <h2>Login</h2>
-        <p>Enter your email to receive a magic link.</p>
-        <LoginForm />
-      </div>
-    );
-  }
-
-  // Dashboard view
   return (
-    <div className="dashboard" style={{ padding: '16px', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>👋 Welcome back</h1>
-      <p className="small" style={{ marginBottom: '20px' }}>
-        {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
-      </p>
-
-      {/* Quick stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-        <StatCard label="Inventory" value={loading ? '—' : inventory.length} />
-        <StatCard label="Expiring Soon" value={loading ? '—' : expiringSoon.length} />
-        <StatCard label="Calories Today" value="—" />
+    <div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h1>Welcome</h1>
+          <div className="small">Smart pantry & calorie companion</div>
+        </div>
+        <div>
+          <Link href="/add-item" className="btn primary">Quick Add</Link>
+        </div>
       </div>
+
+      <div style={{ height: 12 }} />
 
       {/* Quick actions */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-        <a href="/add-item" className="btn primary" style={{ flex: 1, textAlign: 'center' }}>➕ Add Item</a>
-        <a href="/recipes" className="btn" style={{ flex: 1, textAlign: 'center' }}>🍲 Recipes</a>
-        <a href="/log-meal" className="btn" style={{ flex: 1, textAlign: 'center' }}>🍽 Log Meal</a>
+      <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700 }}>Quick actions</div>
+          <div className="small">Manual add, search, or scan a barcode.</div>
+        </div>
+        <div style={{ display:'flex', gap:8 }}>
+          <Link href="/add-item" className="btn">Manual</Link>
+          <Link href="/add-item" className="btn">Search</Link>
+          <Link href="/add-item" className="btn">Scan</Link>
+        </div>
       </div>
 
-      {/* Expiring soon */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '16px' }}>⚠️ Expiring Soon</h2>
-          <select
-            className="input"
-            style={{ width: 'auto', fontSize: '12px', padding: '2px 6px' }}
-            value={daysWindow}
-            onChange={(e) => setDaysWindow(Number(e.target.value))}
-          >
-            <option value={3}>Next 3 days</option>
-            <option value={5}>Next 5 days</option>
-            <option value={7}>Next 7 days</option>
-            <option value={14}>Next 14 days</option>
-          </select>
+      {/* Pantry snapshot */}
+      <div style={{ marginTop: 12 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+          <div style={{ fontWeight:700 }}>Pantry snapshot</div>
+          <Link href="/inventory" className="small">View all</Link>
         </div>
         {loading ? (
-          <SkeletonList count={2} />
-        ) : expiringSoon.length > 0 ? (
-          <div className="list" style={{ marginTop: 8 }}>
-            {expiringSoon.map(item => (
-              <div key={item.id} className="list-item">
+          <div className="card" style={{ display:'grid', gap:10 }}>
+            <div className="skeleton" style={{ width:'60%' }}></div>
+            <div className="skeleton" style={{ width:'40%' }}></div>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="card small">Your pantry is empty. Add something to get suggestions.</div>
+        ) : (
+          <div style={{ display:'grid', gap:8 }}>
+            {items.map(it => (
+              <div key={it.id} className="card" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <div>
-                  <div className="item-title">{item.name}</div>
-                  <div className="item-sub">
-                    Expires {new Date(item.expiry_date).toLocaleDateString()}
-                  </div>
+                  <div style={{ fontWeight:700 }}>{it.name}</div>
+                  <div className="small">{it.quantity}{it.unit} • {it.calories_per_100g} kcal/100g • Exp: {it.expiry_date ? new Date(it.expiry_date).toLocaleDateString() : '—'}</div>
+                </div>
+                <div>
+                  <Link href={`/inventory`} className="btn">Manage</Link>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="small">No items expiring soon 🎉</p>
         )}
       </div>
 
-      {/* Recently added */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '16px' }}>🆕 Recently Added</h2>
-          <a href="/inventory" className="small">View All →</a>
+      {/* Quick recipe suggestions */}
+      <div style={{ marginTop: 18 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+          <div style={{ fontWeight:700 }}>Suggested recipes</div>
+          <Link href="/recipes" className="small">See more</Link>
         </div>
-        {loading ? (
-          <SkeletonList count={3} />
-        ) : inventory.length > 0 ? (
-          <div className="list" style={{ marginTop: 8 }}>
-            {inventory.map(item => (
-              <div key={item.id} className="list-item">
-                <div>
-                  <div className="item-title">{item.name}</div>
-                  <div className="item-sub">
-                    {item.calories_per_100g} kcal/100g • Expires {new Date(item.expiry_date).toLocaleDateString()}
-                  </div>
-                </div>
+        <div style={{ display:'grid', gap:12 }}>
+          {recipes.length === 0 ? (
+            <div className="card small">No suggestions yet. Add staples to your pantry to get suggestions.</div>
+          ) : recipes.map(r => (
+            <div key={r.id} className="card" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div>
+                <div style={{ fontWeight:700 }}>{r.title}</div>
+                <div className="small">{r.cuisine} • {r.servings} servings</div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="small">No items yet. Add your first one!</p>
-        )}
-      </div>
-
-      {/* Recipes teaser */}
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '16px' }}>🍲 Suggested Recipes</h2>
-        <div className="card" style={{ marginTop: 8 }}>
-          <p className="small">Recipe suggestions will appear here (Phase 4).  
-          Based on your inventory, we’ll show Indian + global dishes you can cook.</p>
-          <a href="/recipes" className="btn primary" style={{ marginTop: 10 }}>Explore Recipes</a>
+              <div>
+                <Link href={`/recipes/${r.id}`} className="btn">View</Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* macro placeholder */}
+      <div style={{ marginTop: 18 }} className="card">
+        <div style={{ fontWeight:700 }}>Macros (placeholder)</div>
+        <div className="small">Daily macro targets and logs will appear here (coming soon).</div>
+      </div>
     </div>
-  );
-}
-
-function StatCard({ label, value }) {
-  return (
-    <div className="card" style={{ textAlign: 'center', padding: '12px', borderRadius: '12px' }}>
-      <div className="small">{label}</div>
-      <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{value}</div>
-    </div>
-  );
-}
-
-function SkeletonList({ count = 3 }) {
-  return (
-    <div className="list" style={{ marginTop: 8 }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="skeleton" style={{ height: '40px' }} />
-      ))}
-    </div>
-  );
-}
-
-// Minimal login form (client-side email magic link)
-function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) alert(error.message);
-    else setSent(true);
-  }
-
-  if (sent) return <p>✅ Check your email for the magic link!</p>;
-
-  return (
-    <form onSubmit={handleLogin} style={{ display: 'grid', gap: '10px' }}>
-      <input
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="you@example.com"
-        required
-        className="input"
-      />
-      <button type="submit" className="btn primary">Send Magic Link</button>
-    </form>
   );
 }
