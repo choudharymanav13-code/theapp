@@ -1,57 +1,72 @@
 // src/app/api/recipes/route.js
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+function simplify(s=''){ return String(s).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+function tokens(s=''){ return simplify(s).split(' ').filter(Boolean); }
+function jaccardScore(aTokens, bTokens){
+  const A = new Set(aTokens), B = new Set(bTokens);
+  const inter = [...A].filter(x => B.has(x));
+  const union = new Set([...A, ...B]);
+  return inter.length / (union.size || 1);
+}
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url);
+  try {
+    const url = new URL(req.url);
+    const inventory = url.searchParams.getAll('inventory[]').map(s => s || '').filter(Boolean);
+    const q = url.searchParams.get('q') || '';
+    const fpath = path.join(process.cwd(), 'src', 'data', 'recipes.json');
+    if (!fs.existsSync(fpath)) return NextResponse.json([], { status: 200 });
 
-  const q = searchParams.get("q")?.toLowerCase() || "";
-  const cuisine = searchParams.get("cuisine")?.toLowerCase() || "";
-  const calories = searchParams.get("calories");
-  const suggest = searchParams.get("suggest") === "true";
+    const raw = JSON.parse(fs.readFileSync(fpath, 'utf8'));
+    let recipes = Array.isArray(raw) ? raw.slice() : [];
 
-  const inventory = searchParams.getAll("inventory[]").map(i => i.toLowerCase());
+    // If there's a q param -> search by title / ingredient names
+    if (q && q.trim().length > 0) {
+      const qTokens = tokens(q);
+      recipes = recipes.filter(r => {
+        const hay = tokens(r.title + ' ' + (r.cuisine || '') + ' ' + (r.ingredients || []).map(i=>i.name).join(' '));
+        // require any overlap
+        return qTokens.some(t => hay.includes(t));
+      });
+    }
 
-  const file = path.join(process.cwd(), "src", "data", "recipes.json");
-  const recipes = JSON.parse(fs.readFileSync(file, "utf8"));
+    const invTokens = inventory.map(i => tokens(i));
 
-  let filtered = recipes.map(r => {
-    const matchCount = r.ingredients.filter(ing =>
-      inventory.some(inv => inv.includes(ing.name.toLowerCase()))
-    ).length;
+    // compute match_count & missing list
+    recipes = recipes.map(r => {
+      const required = r.ingredients || [];
+      let match_count = 0;
+      const missing = [];
+      required.forEach(ing => {
+        const ingTokens = tokens(ing.name || '');
+        let best = 0;
+        for (const it of invTokens) {
+          const sc = jaccardScore(ingTokens, it);
+          if (sc > best) best = sc;
+        }
+        if (best > 0.25) match_count++;
+        else missing.push(ing.name);
+      });
+      const required_count = required.length;
+      const match_percent = required_count === 0 ? 0 : (match_count / required_count);
+      return { ...r, match_count, required_count, match_percent, missing };
+    });
 
-    return {
-      ...r,
-      required_count: r.ingredients.length,
-      match_count: matchCount,
-      missing_count: r.ingredients.length - matchCount,
-    };
-  });
+    // Sort: higher match_percent first, fewer missing, then lower calories
+    recipes.sort((a,b) => {
+      if (b.match_percent !== a.match_percent) return b.match_percent - a.match_percent;
+      if ((a.missing?.length||0) !== (b.missing?.length||0)) return (a.missing?.length||0) - (b.missing?.length||0);
+      const ak = a.nutrition?.kcal || 9999;
+      const bk = b.nutrition?.kcal || 9999;
+      return ak - bk;
+    });
 
-  // Apply search
-  if (q) {
-    filtered = filtered.filter(r =>
-      r.title.toLowerCase().includes(q) ||
-      r.ingredients.some(i => i.name.toLowerCase().includes(q))
-    );
+    return NextResponse.json(recipes, { status: 200 });
+  } catch (err) {
+    console.error('recipes route error', err);
+    return NextResponse.json([], { status: 500 });
   }
-
-  // Apply cuisine filter
-  if (cuisine) {
-    filtered = filtered.filter(r => r.cuisine?.toLowerCase() === cuisine);
-  }
-
-  // Apply calories filter
-  if (calories) {
-    const limit = parseInt(calories, 10);
-    filtered = filtered.filter(r => (r.nutrition?.kcal || 0) <= limit);
-  }
-
-  // Suggestions (≤ 2 missing ingredients)
-  if (suggest) {
-    filtered = filtered.filter(r => r.missing_count <= 2);
-  }
-
-  return NextResponse.json(filtered);
 }
