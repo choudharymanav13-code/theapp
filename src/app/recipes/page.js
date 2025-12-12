@@ -1,3 +1,4 @@
+// src/app/recipes/page.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,19 +10,22 @@ export default function RecipesList() {
   const [loading, setLoading] = useState(true);
   const [inventoryNames, setInventoryNames] = useState([]);
   const [user, setUser] = useState(null);
-  const [cookSummary, setCookSummary] = useState(null); // summary modal
+  const [cookSummary, setCookSummary] = useState(null);
 
   useEffect(() => {
     loadInventoryNames();
   }, []);
 
   useEffect(() => {
-    if (inventoryNames.length > 0) fetchRecipes();
+    if (inventoryNames.length >= 0) fetchRecipes();
   }, [inventoryNames]);
 
   async function loadInventoryNames() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return setLoading(false);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setUser(user);
     const { data } = await supabase.from('items').select('name');
     setInventoryNames((data || []).map(i => i.name));
@@ -35,7 +39,7 @@ export default function RecipesList() {
       const res = await fetch(`/api/recipes?${params.toString()}`);
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
       const j = await res.json();
-      setRecipes(j);
+      setRecipes(j || []);
     } catch (err) {
       console.error('fetchRecipes error:', err);
       setRecipes([]);
@@ -45,15 +49,13 @@ export default function RecipesList() {
   }
 
   async function cookRecipe(recipe) {
-    if (!confirm(`Cook "${recipe.title}"?\nThis will deduct ingredients from your pantry.`)) {
-      return;
-    }
+    if (!confirm(`Cook "${recipe.title}"?\nThis will deduct ingredients from your pantry.`)) return;
 
     try {
       const res = await fetch('/api/recipes/cook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipeId: recipe.id, user_id: user.id })
+        body: JSON.stringify({ recipeId: recipe.id, user_id: user?.id })
       });
       const data = await res.json();
 
@@ -62,52 +64,47 @@ export default function RecipesList() {
         return;
       }
 
-      // open modal summary
       setCookSummary({ recipe: recipe.title, results: data.results });
     } catch (err) {
-      console.error('cookRecipe error', err);
+      console.error('cookRecipe error:', err);
       alert('Something went wrong while cooking.');
     }
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1>Recipes</h1>
+    <div style={{ padding: 0 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <h1>Recipes</h1>
+        <Link href="/recipes/add" className="btn">Add Recipe</Link>
+      </div>
+
       <div style={{ marginTop: 12 }}>
         {loading ? <div className="small">Loading…</div> : (
-          <div style={{ display: 'grid', gap: 12 }}>
-            {recipes.length === 0 && (
-              <div className="small">No recipes found with your current pantry.</div>
-            )}
-            {recipes.map(r => (
-              <div key={r.id} className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{r.title}</div>
-                    <div className="small">
-                      {r.cuisine} • Serves {r.servings} • {r.nutrition?.kcal} kcal
+          <>
+            {recipes.length === 0 && <div className="small">No recipes found with your current pantry.</div>}
+            <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
+              {recipes.map(r => (
+                <div key={r.id} className="card">
+                  <div style={{ display:'flex', justifyContent:'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight:700 }}>{r.title}</div>
+                      <div className="small">{r.cuisine} • Serves {r.servings} • {r.nutrition?.kcal ?? '—'} kcal</div>
+                    </div>
+                    <div style={{ textAlign:'right' }}>
+                      <div style={{ fontSize:18, fontWeight:700 }}>{r.match_count ?? '-'}/{r.required_count ?? r.ingredients.length}</div>
+                      <div className="small">Have ingredients</div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 18, fontWeight: 700 }}>
-                      {r.match_count ?? '-'}/{r.required_count ?? r.ingredients.length}
-                    </div>
-                    <div className="small">Have ingredients</div>
+
+                  <div style={{ marginTop: 8, display:'flex', gap:8 }}>
+                    <Link href={`/recipes/${r.id}`} className="btn">View</Link>
+                    <button className="btn" onClick={() => cookRecipe(r)}>Cook Now</button>
+                    {r.missing && r.missing.length > 0 && <div style={{ marginLeft: 'auto' }} className="small">Missing: {r.missing.slice(0,2).join(', ')}{r.missing.length>2 ? '...' : ''}</div>}
                   </div>
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <Link href={`/recipes/${r.id}`} className="btn">View</Link>
-                  <button
-                    className="btn"
-                    style={{ marginLeft: 8 }}
-                    onClick={() => cookRecipe(r)}
-                  >
-                    Cook Now
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
@@ -116,28 +113,22 @@ export default function RecipesList() {
         <div className="modal-overlay">
           <div className="modal-card">
             <h2>Cooked {cookSummary.recipe}</h2>
-            <div className="list">
+            <div className="list" style={{ marginTop: 8 }}>
               {cookSummary.results.map((r, i) => (
                 <div key={i} className={`list-item ${r.ok ? 'success' : 'fail'}`}>
-                  <div className="item-title">{r.name || 'Unknown'}</div>
-                  <div className="item-sub">
-                    {r.ok
-                      ? `✔ Deducted ${r.deducted}${r.unit} • Remaining: ${r.remaining}`
-                      : `❌ ${r.error}`}
+                  <div>
+                    <div className="item-title">{r.matchedWith ?? r.name ?? 'Unknown'}</div>
+                    <div className="item-sub">
+                      {r.ok ? `✔ Deducted ${r.deducted}${r.unit} • Remaining: ${r.remaining}` : `❌ ${r.error || 'not found'}`}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-            <button
-              className="btn primary"
-              onClick={() => {
-                setCookSummary(null);
-                window.location.href = '/recipes';
-              }}
-              style={{ marginTop: 16 }}
-            >
-              Done
-            </button>
+            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="small">{cookSummary.results.filter(x=>x.ok).length} succeeded • {cookSummary.results.filter(x=>!x.ok).length} failed</div>
+              <button className="btn primary" onClick={() => { setCookSummary(null); window.location.href = '/recipes'; }}>Done</button>
+            </div>
           </div>
         </div>
       )}
