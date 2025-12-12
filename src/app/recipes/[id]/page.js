@@ -1,7 +1,9 @@
+// src/app/recipes/[id]/page.js
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '../../../lib/supabaseClient';
 
 export default function RecipeDetail() {
@@ -15,36 +17,36 @@ export default function RecipeDetail() {
 
   useEffect(() => {
     loadUserAndRecipe();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   async function loadUserAndRecipe() {
+    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
+    setUser(user || null);
 
-    const res = await fetch(`/api/recipes?id=${id}`);
-    const data = await res.json();
-    setRecipe(Array.isArray(data) ? data[0] : data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/recipes?id=${encodeURIComponent(id)}`);
+      const j = await res.json();
+      const r = Array.isArray(j) ? j[0] : j;
+      setRecipe(r || null);
+    } catch (e) {
+      setRecipe(null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function cookRecipe() {
-    if (!confirm(`Cook "${recipe.title}"?\nThis will deduct ingredients from your pantry.`)) {
-      return;
-    }
-
+    if (!confirm(`Cook "${recipe.title}"?\nThis will deduct ingredients from your pantry.`)) return;
     try {
       const res = await fetch('/api/recipes/cook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipeId: recipe.id, user_id: user.id })
+        body: JSON.stringify({ recipeId: recipe.id, user_id: user?.id })
       });
       const data = await res.json();
-
-      if (data.error) {
-        alert(`Error: ${data.error}`);
-        return;
-      }
-
+      if (data.error) { alert('Error: ' + data.error); return; }
       setCookSummary({ recipe: recipe.title, results: data.results });
     } catch (err) {
       console.error('cookRecipe error', err);
@@ -56,53 +58,58 @@ export default function RecipeDetail() {
   if (!recipe) return <div style={{ padding: 16 }}>Recipe not found.</div>;
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1>{recipe.title}</h1>
-      <div className="small">{recipe.cuisine} • Serves {recipe.servings}</div>
-      <div style={{ marginTop: 12 }}>
-        <strong>Ingredients:</strong>
-        <ul>
-          {recipe.ingredients.map((ing, i) => (
-            <li key={i}>{ing.name} — {ing.qty}{ing.unit}</li>
-          ))}
-        </ul>
-      </div>
-      <div style={{ marginTop: 12 }}>
-        <strong>Instructions:</strong>
-        <p>{recipe.instructions || 'No instructions provided.'}</p>
+    <div style={{ padding: 0 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <h1>{recipe.title}</h1>
+          <div className="small">{recipe.cuisine} • Serves {recipe.servings}</div>
+        </div>
+        <div>
+          <Link href="/recipes" className="btn">Back</Link>
+        </div>
       </div>
 
-      <button className="btn primary" style={{ marginTop: 16 }} onClick={cookRecipe}>
-        Cook Now
-      </button>
+      <div style={{ marginTop: 12 }}>
+        <div className="card">
+          <strong>Ingredients</strong>
+          <ul style={{ marginTop:8 }}>
+            {recipe.ingredients.map((ing, i) => (
+              <li key={i} className="small">{ing.name} — {ing.qty}{ing.unit}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div style={{ marginTop: 12 }} className="card">
+          <strong>Instructions</strong>
+          <div style={{ marginTop:8 }} className="small">{recipe.instructions || 'No instructions provided.'}</div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <button className="btn primary" onClick={cookRecipe}>Cook Now</button>
+        </div>
+      </div>
 
       {/* Cook Summary Modal */}
       {cookSummary && (
         <div className="modal-overlay">
           <div className="modal-card">
             <h2>Cooked {cookSummary.recipe}</h2>
-            <div className="list">
+            <div className="list" style={{ marginTop: 8 }}>
               {cookSummary.results.map((r, i) => (
                 <div key={i} className={`list-item ${r.ok ? 'success' : 'fail'}`}>
-                  <div className="item-title">{r.name || 'Unknown'}</div>
-                  <div className="item-sub">
-                    {r.ok
-                      ? `✔ Deducted ${r.deducted}${r.unit} • Remaining: ${r.remaining}`
-                      : `❌ ${r.error}`}
+                  <div>
+                    <div className="item-title">{r.matchedWith ?? r.name ?? 'Unknown'}</div>
+                    <div className="item-sub">
+                      {r.ok ? `✔ Deducted ${r.deducted}${r.unit} • Remaining: ${r.remaining}` : `❌ ${r.error}`}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-            <button
-              className="btn primary"
-              onClick={() => {
-                setCookSummary(null);
-                window.location.href = '/recipes';
-              }}
-              style={{ marginTop: 16 }}
-            >
-              Done
-            </button>
+            <div style={{ marginTop: 12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div className="small">{cookSummary.results.filter(x=>x.ok).length} succeeded • {cookSummary.results.filter(x=>!x.ok).length} failed</div>
+              <button className="btn primary" onClick={() => { setCookSummary(null); window.location.href = '/recipes'; }}>Done</button>
+            </div>
           </div>
         </div>
       )}
