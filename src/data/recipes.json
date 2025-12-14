@@ -1,8 +1,13 @@
 [
   {
+    "id": "indian-1",
     "title": "Aloo Paratha",
     "cuisine": "Indian",
+    "difficulty": "Easy",
     "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
     "ingredients": [
       {
         "name": "Wheat Flour",
@@ -16,80 +21,4272 @@
       },
       {
         "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-2",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
         "qty": 10,
         "unit": "ml"
       }
     ],
     "steps": [
-      "Boil and mash potatoes",
-      "Mix potatoes with spices",
-      "Prepare dough with flour",
-      "Stuff, roll, and cook on tawa"
-    ],
-    "nutrition": {
-      "kcal": 350,
-      "protein": 8,
-      "carbs": 60,
-      "fat": 10
-    },
-    "id": "aloo-paratha-0"
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
   },
   {
-    "title": "Boondi Raita",
+    "id": "indian-3",
+    "title": "Paneer Bhurji",
     "cuisine": "Indian",
+    "difficulty": "Easy",
     "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
     "ingredients": [
       {
-        "name": "Curd",
+        "name": "Paneer",
         "qty": 200,
         "unit": "g"
       },
       {
-        "name": "Boondi",
-        "qty": 50,
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-4",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-5",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
         "unit": "g"
       }
     ],
     "steps": [
-      "Whisk curd",
-      "Add soaked boondi",
-      "Season and serve"
-    ],
-    "nutrition": {
-      "kcal": 180,
-      "protein": 6,
-      "carbs": 12,
-      "fat": 8
-    },
-    "id": "boondi-raita-1"
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
   },
   {
-    "title": "Scrambled Eggs",
-    "cuisine": "Global",
-    "servings": 1,
+    "id": "indian-6",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
     "ingredients": [
       {
-        "name": "Eggs",
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
         "qty": 2,
         "unit": "count"
       },
       {
-        "name": "Butter",
-        "qty": 5,
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-7",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-8",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-9",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-10",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
         "unit": "g"
       }
     ],
     "steps": [
-      "Beat eggs",
-      "Cook gently in butter",
-      "Season and serve"
-    ],
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-11",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
     "nutrition": {
-      "kcal": 220,
-      "protein": 12,
-      "carbs": 2,
-      "fat": 18
+      "kcal": 320
     },
-    "id": "scrambled-eggs-2"
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-12",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-13",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-14",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-15",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-16",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-17",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-18",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-19",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-20",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-21",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-22",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-23",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-24",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-25",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-26",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-27",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-28",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-29",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-30",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-31",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-32",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-33",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-34",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-35",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-36",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-37",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-38",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-39",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-40",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-41",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-42",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-43",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-44",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-45",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-46",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-47",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-48",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-49",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-50",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-51",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-52",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-53",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-54",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-55",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-56",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-57",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-58",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-59",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-60",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-61",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-62",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-63",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-64",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-65",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-66",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-67",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-68",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-69",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-70",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-71",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-72",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-73",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-74",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-75",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-76",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-77",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-78",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-79",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-80",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-81",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-82",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-83",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-84",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-85",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-86",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-87",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-88",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-89",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-90",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-91",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-92",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-93",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-94",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-95",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-96",
+    "title": "Aloo Paratha",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 320
+    },
+    "ingredients": [
+      {
+        "name": "Wheat Flour",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Potato",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-97",
+    "title": "Dal Tadka",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 280
+    },
+    "ingredients": [
+      {
+        "name": "Toor Dal",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-98",
+    "title": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 350
+    },
+    "ingredients": [
+      {
+        "name": "Paneer",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Onion",
+        "qty": 1,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-99",
+    "title": "Jeera Rice",
+    "cuisine": "Indian",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 240
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Oil",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "indian-100",
+    "title": "Curd Rice",
+    "cuisine": "Indian",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 260
+    },
+    "ingredients": [
+      {
+        "name": "Rice",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "name": "Curd",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Prep ingredients",
+      "Cook",
+      "Serve hot"
+    ]
+  },
+  {
+    "id": "global-1",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-2",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-3",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-4",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-5",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-6",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-7",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-8",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-9",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-10",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-11",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-12",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-13",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-14",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-15",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-16",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-17",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-18",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-19",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-20",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-21",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-22",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-23",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-24",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-25",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-26",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-27",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-28",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-29",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-30",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-31",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-32",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-33",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-34",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-35",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-36",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-37",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-38",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-39",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-40",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-41",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-42",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-43",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-44",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-45",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-46",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-47",
+    "title": "Grilled Sandwich",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 300
+    },
+    "ingredients": [
+      {
+        "name": "Bread",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-48",
+    "title": "Tomato Soup",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 180
+    },
+    "ingredients": [
+      {
+        "name": "Tomato",
+        "qty": 3,
+        "unit": "count"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-49",
+    "title": "Pasta Alfredo",
+    "cuisine": "Global",
+    "difficulty": "Easy",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 420
+    },
+    "ingredients": [
+      {
+        "name": "Pasta",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Milk",
+        "qty": 100,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
+  },
+  {
+    "id": "global-50",
+    "title": "Omelette",
+    "cuisine": "Global",
+    "difficulty": "Medium",
+    "servings": 2,
+    "nutrition": {
+      "kcal": 250
+    },
+    "ingredients": [
+      {
+        "name": "Egg",
+        "qty": 2,
+        "unit": "count"
+      },
+      {
+        "name": "Oil",
+        "qty": 5,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Prepare",
+      "Cook",
+      "Serve"
+    ]
   }
 ]
