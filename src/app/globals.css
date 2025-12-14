@@ -1,95 +1,154 @@
-body {
+/* =====================
+   GLOBAL THEME
+===================== */
+
+:root {
+  --bg: #0b0f14;
+  --card: #121826;
+  --muted: #9ca3af;
+  --text: #f9fafb;
+  --accent: #22c55e;
+  --accent-soft: #16a34a;
+  --danger: #ef4444;
+  --border: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0b0f19;
-  color: #e5e7eb;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.login-bg {
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #1f2937, #020617);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.login-glass {
-  width: 360px;
-  padding: 28px;
-  border-radius: 18px;
-  background: rgba(17, 24, 39, 0.85);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  text-align: center;
+/* =====================
+   LAYOUT
+===================== */
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: 90px; /* space for bottom nav */
 }
 
-.slide-in {
-  animation: slideIn 0.6s ease-out;
+/* =====================
+   TYPOGRAPHY
+===================== */
+
+h1 {
+  font-size: 22px;
+  margin: 0;
 }
 
-@keyframes slideIn {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.small {
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.login-title {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 6px;
+/* =====================
+   CARDS
+===================== */
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
 }
 
-.login-sub {
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 20px;
-}
-
-.input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #020617;
-  color: white;
-}
+/* =====================
+   BUTTONS
+===================== */
 
 .btn {
-  width: 100%;
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 10px;
-  border: none;
-  background: #22c55e;
-  color: #022c22;
-  font-weight: 700;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
   cursor: pointer;
-  margin-bottom: 10px;
 }
 
-.btn.google {
-  background: #2563eb;
-  color: white;
+.btn.primary {
+  background: var(--accent);
+  border: none;
+  color: #052e16;
+  font-weight: 700;
 }
 
 .btn.ghost {
-  background: transparent;
-  border: 1px solid #374151;
-  color: #e5e7eb;
+  border: none;
+  color: var(--accent);
+  padding: 0;
 }
 
-.row {
+/* =====================
+   LIST ITEMS
+===================== */
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.list-item {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =====================
+   QUICK ACTION BAR
+===================== */
+
+.quick-actions {
+  display: flex;
+  justify-content: space-between;
   gap: 8px;
 }
 
-.divider {
-  font-size: 12px;
-  opacity: 0.6;
-  margin: 12px 0;
+.quick-actions .btn {
+  flex: 1;
+  font-size: 13px;
 }
 
-.error {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #f87171;
+/* =====================
+   CHEVRON
+===================== */
+
+.chevron {
+  font-size: 20px;
+  color: var(--muted);
+}
+
+/* =====================
+   SKELETON
+===================== */
+
+.skeleton {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #1f2937 25%,
+    #374151 37%,
+    #1f2937 63%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
 }
