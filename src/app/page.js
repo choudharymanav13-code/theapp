@@ -11,128 +11,146 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    init();
+    loadData();
   }, []);
 
-  async function init() {
-    const { data: { user } } = await supabase.auth.getUser();
+  async function loadData() {
+    setLoading(true);
 
-    // 🔴 NOT LOGGED IN → GO TO LOGIN
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.location.replace('/login');
+      setLoading(false);
       return;
     }
-
     setUser(user);
 
-    // Pantry snapshot
     const { data: itemsData } = await supabase
       .from('items')
       .select('*')
       .order('expiry_date', { ascending: true })
-      .limit(12);
+      .limit(6);
 
     setItems(itemsData || []);
 
     // Recipe suggestions
-    const invNames = (itemsData || []).map(i => i.name).slice(0, 20);
-    if (invNames.length > 0) {
-      const params = new URLSearchParams();
-      invNames.forEach(n => params.append('inventory[]', n));
-      const res = await fetch(`/api/recipes?${params.toString()}`);
-      if (res.ok) {
-        const j = await res.json();
-        setRecipes((j || []).slice(0, 4));
-      }
+    const invNames = (itemsData || []).map(i => i.name);
+    const params = new URLSearchParams();
+    invNames.forEach(n => params.append('inventory[]', n));
+
+    const res = await fetch(`/api/recipes?${params.toString()}`);
+    if (res.ok) {
+      const j = await res.json();
+      setRecipes((j || []).slice(0, 3));
     }
 
     setLoading(false);
   }
 
-  if (loading) {
-    return <div className="card">Loading dashboard…</div>;
-  }
+  const firstName =
+    user?.user_metadata?.full_name?.split(' ')[0] ||
+    user?.email?.split('@')[0] ||
+    'there';
 
   return (
-    <div className="page">
-      {/* Header */}
-      <div className="row space-between">
-        <div>
-          <h1>Welcome 👋</h1>
-          <div className="small">Your smart pantry & calorie coach</div>
+    <div>
+
+      {/* 🔝 MINIMAL HEADER */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ marginBottom: 4 }}>Welcome, {firstName} 👋</h1>
+            <div className="small">Your smart pantry & calorie coach</div>
+          </div>
+
+          <Link href="/add-item" className="btn primary">
+            + Add
+          </Link>
         </div>
-        <Link href="/add-item" className="btn primary">+ Add</Link>
+
+        {/* 🔥 Calorie Placeholder */}
+        <div
+          className="card"
+          style={{
+            marginTop: 14,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <div>
+            <div style={{ fontWeight: 700 }}>Today’s Calories</div>
+            <div className="small">Personalised tracking coming soon</div>
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 800, opacity: 0.6 }}>
+            — kcal
+          </div>
+        </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="card" style={{ marginTop: 16 }}>
-        <div className="small">Quick actions</div>
-        <div className="row" style={{ gap: 8, marginTop: 8 }}>
-          <Link href="/add-item" className="btn ghost">Manual</Link>
-          <Link href="/add-item" className="btn ghost">Search</Link>
-          <Link href="/add-item" className="btn ghost">Scan</Link>
-        </div>
-      </div>
-
-      {/* Pantry snapshot */}
-      <div style={{ marginTop: 20 }}>
-        <div className="row space-between">
-          <strong>Pantry snapshot</strong>
+      {/* 🧺 PANTRY SNAPSHOT */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ fontWeight: 700 }}>Pantry snapshot</div>
           <Link href="/inventory" className="small">View all</Link>
         </div>
 
-        {items.length === 0 ? (
-          <div className="card small" style={{ marginTop: 8 }}>
-            Your pantry is empty.
-          </div>
+        {loading ? (
+          <div className="card skeleton" style={{ height: 80 }} />
+        ) : items.length === 0 ? (
+          <div className="card small">Your pantry is empty.</div>
         ) : (
-          <div className="card list" style={{ marginTop: 8 }}>
+          <div style={{ display: 'grid', gap: 8 }}>
             {items.map(it => (
-              <div key={it.id} className="list-item">
+              <div
+                key={it.id}
+                className="card"
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div>
-                  <strong>{it.name}</strong>
+                  <div style={{ fontWeight: 700 }}>{it.name}</div>
                   <div className="small">
-                    {it.quantity}{it.unit} • {it.calories_per_100g} kcal • Exp {new Date(it.expiry_date).toLocaleDateString()}
+                    {it.quantity}{it.unit} • {it.calories_per_100g} kcal • Exp{' '}
+                    {it.expiry_date
+                      ? new Date(it.expiry_date).toLocaleDateString()
+                      : '—'}
                   </div>
                 </div>
-                <span className="chevron">›</span>
+                <span style={{ opacity: 0.6 }}>›</span>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Recipes */}
-      <div style={{ marginTop: 20 }}>
-        <div className="row space-between">
-          <strong>Suggested recipes</strong>
+      {/* 🍳 SUGGESTED RECIPES */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ fontWeight: 700 }}>Suggested recipes</div>
           <Link href="/recipes" className="small">See more</Link>
         </div>
 
         {recipes.length === 0 ? (
-          <div className="card small" style={{ marginTop: 8 }}>
-            Add more items to unlock recipes.
-          </div>
+          <div className="card small">Add more items to unlock recipes.</div>
         ) : (
-          <div className="card list" style={{ marginTop: 8 }}>
+          <div style={{ display: 'grid', gap: 8 }}>
             {recipes.map(r => (
-              <div key={r.id} className="list-item">
+              <Link
+                key={r.id}
+                href={`/recipes/${r.id}`}
+                className="card"
+                style={{ display: 'flex', justifyContent: 'space-between' }}
+              >
                 <div>
-                  <strong>{r.title}</strong>
+                  <div style={{ fontWeight: 700 }}>{r.title}</div>
                   <div className="small">{r.cuisine} • {r.servings} servings</div>
                 </div>
-                <span className="chevron">›</span>
-              </div>
+                <span style={{ opacity: 0.6 }}>›</span>
+              </Link>
             ))}
           </div>
         )}
       </div>
 
-      {/* Macros placeholder */}
-      <div className="card" style={{ marginTop: 20 }}>
-        <strong>Macros</strong>
-        <div className="small">Daily macro tracking coming soon.</div>
-      </div>
     </div>
   );
 }
