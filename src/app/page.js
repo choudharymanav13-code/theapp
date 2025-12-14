@@ -5,48 +5,58 @@ import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function HomePage() {
+  const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    init();
   }, []);
 
-  async function loadData() {
-    setLoading(true);
-
+  async function init() {
     const { data: { user } } = await supabase.auth.getUser();
+
+    // 🔴 NOT LOGGED IN → GO TO LOGIN
     if (!user) {
-      setLoading(false);
+      window.location.replace('/login');
       return;
     }
 
+    setUser(user);
+
+    // Pantry snapshot
     const { data: itemsData } = await supabase
       .from('items')
       .select('*')
       .order('expiry_date', { ascending: true })
-      .limit(6);
+      .limit(12);
 
     setItems(itemsData || []);
 
-    const invNames = (itemsData || []).map(i => i.name);
-    const params = new URLSearchParams();
-    invNames.forEach(n => params.append('inventory[]', n));
-
-    const res = await fetch(`/api/recipes?${params.toString()}`);
-    if (res.ok) {
-      const j = await res.json();
-      setRecipes(j.slice(0, 3));
+    // Recipe suggestions
+    const invNames = (itemsData || []).map(i => i.name).slice(0, 20);
+    if (invNames.length > 0) {
+      const params = new URLSearchParams();
+      invNames.forEach(n => params.append('inventory[]', n));
+      const res = await fetch(`/api/recipes?${params.toString()}`);
+      if (res.ok) {
+        const j = await res.json();
+        setRecipes((j || []).slice(0, 4));
+      }
     }
 
     setLoading(false);
   }
 
+  if (loading) {
+    return <div className="card">Loading dashboard…</div>;
+  }
+
   return (
-    <div className="container">
-      {/* HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="page">
+      {/* Header */}
+      <div className="row space-between">
         <div>
           <h1>Welcome 👋</h1>
           <div className="small">Your smart pantry & calorie coach</div>
@@ -54,74 +64,72 @@ export default function HomePage() {
         <Link href="/add-item" className="btn primary">+ Add</Link>
       </div>
 
-      {/* QUICK ACTIONS */}
-      <div style={{ marginTop: 16 }} className="quick-actions">
-        <Link href="/add-item" className="btn">Manual</Link>
-        <Link href="/add-item" className="btn">Search</Link>
-        <Link href="/add-item" className="btn">Scan</Link>
+      {/* Quick actions */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="small">Quick actions</div>
+        <div className="row" style={{ gap: 8, marginTop: 8 }}>
+          <Link href="/add-item" className="btn ghost">Manual</Link>
+          <Link href="/add-item" className="btn ghost">Search</Link>
+          <Link href="/add-item" className="btn ghost">Scan</Link>
+        </div>
       </div>
 
-      {/* PANTRY */}
-      <div style={{ marginTop: 22 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+      {/* Pantry snapshot */}
+      <div style={{ marginTop: 20 }}>
+        <div className="row space-between">
           <strong>Pantry snapshot</strong>
           <Link href="/inventory" className="small">View all</Link>
         </div>
 
-        <div className="card">
-          {loading ? (
-            <>
-              <div className="skeleton" />
-              <div className="skeleton" style={{ width: '60%' }} />
-            </>
-          ) : items.length === 0 ? (
-            <div className="small">Your pantry is empty.</div>
-          ) : (
-            <div className="list">
-              {items.map(it => (
-                <div key={it.id} className="list-item">
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{it.name}</div>
-                    <div className="small">
-                      {it.quantity}{it.unit} • {it.calories_per_100g} kcal • Exp {new Date(it.expiry_date).toLocaleDateString()}
-                    </div>
+        {items.length === 0 ? (
+          <div className="card small" style={{ marginTop: 8 }}>
+            Your pantry is empty.
+          </div>
+        ) : (
+          <div className="card list" style={{ marginTop: 8 }}>
+            {items.map(it => (
+              <div key={it.id} className="list-item">
+                <div>
+                  <strong>{it.name}</strong>
+                  <div className="small">
+                    {it.quantity}{it.unit} • {it.calories_per_100g} kcal • Exp {new Date(it.expiry_date).toLocaleDateString()}
                   </div>
-                  <Link href="/inventory" className="chevron">›</Link>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <span className="chevron">›</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* RECIPES */}
-      <div style={{ marginTop: 22 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+      {/* Recipes */}
+      <div style={{ marginTop: 20 }}>
+        <div className="row space-between">
           <strong>Suggested recipes</strong>
           <Link href="/recipes" className="small">See more</Link>
         </div>
 
-        <div className="card">
-          {recipes.length === 0 ? (
-            <div className="small">Add more items to unlock recipes.</div>
-          ) : (
-            <div className="list">
-              {recipes.map(r => (
-                <div key={r.id} className="list-item">
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{r.title}</div>
-                    <div className="small">{r.cuisine} • {r.servings} servings</div>
-                  </div>
-                  <Link href={`/recipes/${r.id}`} className="chevron">›</Link>
+        {recipes.length === 0 ? (
+          <div className="card small" style={{ marginTop: 8 }}>
+            Add more items to unlock recipes.
+          </div>
+        ) : (
+          <div className="card list" style={{ marginTop: 8 }}>
+            {recipes.map(r => (
+              <div key={r.id} className="list-item">
+                <div>
+                  <strong>{r.title}</strong>
+                  <div className="small">{r.cuisine} • {r.servings} servings</div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <span className="chevron">›</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* MACROS PLACEHOLDER */}
-      <div style={{ marginTop: 22 }} className="card">
+      {/* Macros placeholder */}
+      <div className="card" style={{ marginTop: 20 }}>
         <strong>Macros</strong>
         <div className="small">Daily macro tracking coming soon.</div>
       </div>
