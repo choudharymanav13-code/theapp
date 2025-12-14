@@ -313,3 +313,28 @@ h1 {
   gap: 10px;
   margin-top: 16px;
 }
+/* ----- Inventory polish ----- */
+.inventory-card {
+  background: linear-gradient(145deg, #020617, #0f172a);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  margin-top: 22px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+/* Expiry indicators */
+.exp-expired { border-left: 4px solid #ef4444; }
+.exp-soon { border-left: 4px solid #f97316; }
+.exp-warn { border-left: 4px solid #eab308; }
+.exp-safe { border-left: 4px solid #22c55e; }
+
+.item-title {
+  font-weight: 700;
+}
