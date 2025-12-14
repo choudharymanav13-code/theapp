@@ -8,9 +8,8 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [cuisine, setCuisine] = useState('All');
-  const [availability, setAvailability] = useState('All');
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
 
   useEffect(() => {
     load();
@@ -19,79 +18,95 @@ export default function RecipesPage() {
   async function load() {
     setLoading(true);
 
-    const invRes = await supabase.from('items').select('name');
-    const invNames = (invRes.data || []).map(i => i.name.toLowerCase());
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return setLoading(false);
 
+    const { data: items } = await supabase
+      .from('items')
+      .select('name');
+
+    const invNames = (items || []).map(i => i.name);
     setInventory(invNames);
 
-    const res = await fetch('/api/recipes');
-    const allRecipes = await res.json();
+    const params = new URLSearchParams();
+    invNames.forEach(n => params.append('inventory[]', n));
 
-    const enriched = allRecipes.map(r => {
-      const missing = r.ingredients.filter(
-        i => !invNames.some(n => n.includes(i.name.toLowerCase()))
-      ).length;
+    const res = await fetch(`/api/recipes?${params.toString()}`);
+    const data = await res.json();
+    setRecipes(data || []);
 
-      return {
-        ...r,
-        missingCount: missing,
-      };
-    });
-
-    setRecipes(enriched);
     setLoading(false);
   }
 
+  const cuisines = ['All', ...new Set(recipes.map(r => r.cuisine))];
+
   const filtered = recipes.filter(r => {
     if (cuisine !== 'All' && r.cuisine !== cuisine) return false;
-    if (availability === '<=2' && r.missingCount > 2) return false;
+    if (onlyAvailable && r.missing.length > 2) return false;
     return true;
   });
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Recipes</h1>
-        <Link href="/recipes/add" className="btn primary">Add Recipe</Link>
+        <Link href="/recipes/add" className="btn primary">+ Add Recipe</Link>
       </div>
 
       {/* Filters */}
-      <div className="card" style={{ display:'flex', gap:12, marginTop:12 }}>
+      <div className="card" style={{ marginTop: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
         <select className="input" value={cuisine} onChange={e => setCuisine(e.target.value)}>
-          <option value="All">All cuisines</option>
-          <option value="Indian">Indian</option>
-          <option value="Global">Global</option>
+          {cuisines.map(c => <option key={c}>{c}</option>)}
         </select>
 
-        <select className="input" value={availability} onChange={e => setAvailability(e.target.value)}>
-          <option value="All">All recipes</option>
-          <option value="<=2">Missing ≤ 2 items</option>
-        </select>
+        <label className="small" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={onlyAvailable}
+            onChange={e => setOnlyAvailable(e.target.checked)}
+          />
+          ≤ 2 missing ingredients
+        </label>
       </div>
 
-      {loading && <div className="small" style={{ marginTop:12 }}>Loading recipes…</div>}
+      {/* List */}
+      {loading ? (
+        <div className="small" style={{ marginTop: 20 }}>Loading recipes…</div>
+      ) : filtered.length === 0 ? (
+        <div className="card small" style={{ marginTop: 20 }}>
+          No recipes match your pantry right now.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+          {filtered.map(r => (
+            <Link
+              key={r.id}
+              href={`/recipes/${r.id}`}
+              className="card"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontWeight: 700 }}>{r.title}</div>
+                  <div className="small">
+                    {r.cuisine} • Serves {r.servings}
+                  </div>
+                  <div className="small">
+                    Missing: {r.missing.length === 0 ? 'None 🎉' : r.missing.join(', ')}
+                  </div>
+                </div>
 
-      {!loading && filtered.length === 0 && (
-        <div className="card small" style={{ marginTop:12 }}>
-          No recipes match your filters.
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700 }}>
+                    {r.match_count}/{r.required_count}
+                  </div>
+                  <div className="small">ingredients</div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
-
-      <div style={{ display:'grid', gap:12, marginTop:12 }}>
-        {filtered.map(r => (
-          <div key={r.id} className="card">
-            <div style={{ fontWeight:700 }}>{r.title}</div>
-            <div className="small">
-              {r.cuisine} • Serves {r.servings} • Missing {r.missingCount}
-            </div>
-
-            <div style={{ display:'flex', gap:8, marginTop:8 }}>
-              <Link href={`/recipes/${r.id}`} className="btn">View</Link>
-              <Link href={`/recipes/${r.id}`} className="btn">Cook Now</Link>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
