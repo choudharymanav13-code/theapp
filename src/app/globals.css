@@ -244,3 +244,72 @@ h1 {
 .container {
   padding-bottom: 110px;
 }
+/* ----- Layout fix for bottom nav ----- */
+.page {
+  padding-bottom: 90px;
+}
+
+/* ----- Recipe grid ----- */
+.grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.recipe-card {
+  background: linear-gradient(145deg, #0f172a, #020617);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recipe-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.badge {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #a7f3d0;
+}
+
+/* ----- Modal ----- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: #020617;
+  border-radius: 16px;
+  padding: 16px;
+  width: 90%;
+  max-width: 420px;
+}
+
+.ingredient {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.ingredient.have {
+  color: #22c55e;
+}
+
+.ingredient.missing {
+  color: #ef4444;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
