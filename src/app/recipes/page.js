@@ -1,118 +1,92 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeRecipe, setActiveRecipe] = useState(null);
 
   useEffect(() => {
-    loadData();
+    load();
   }, []);
 
-  async function loadData() {
+  async function load() {
     setLoading(true);
 
-    const { data: inv } = await supabase
-      .from('items')
-      .select('name');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return setLoading(false);
 
-    const inventoryNames = (inv || []).map(i =>
-      i.name.toLowerCase()
-    );
-    setInventory(inventoryNames);
+    const { data: inv } = await supabase.from('items').select('name');
+    const invNames = (inv || []).map(i => i.name.toLowerCase());
+    setInventory(invNames);
 
-    const res = await fetch('/api/recipes');
-    const allRecipes = await res.json();
+    const params = new URLSearchParams();
+    invNames.forEach(n => params.append('inventory[]', n));
+    const res = await fetch(`/api/recipes?${params.toString()}`);
+    const data = await res.json();
 
-    const enriched = (allRecipes || [])
-      .map(r => {
-        const required = r.ingredients || [];
-        const have = required.filter(i =>
-          inventoryNames.some(n =>
-            n.includes(i.name.toLowerCase())
-          )
-        );
-        const missing = required.length - have.length;
-        return { ...r, haveCount: have.length, missing };
-      })
-      .filter(r => r.missing <= 2);
+    const scored = (data || []).map(r => {
+      const missing = r.ingredients.filter(
+        i => !invNames.some(n => n.includes(i.name.toLowerCase()))
+      );
+      return {
+        ...r,
+        missing,
+        missingCount: missing.length
+      };
+    })
+    .filter(r => r.missingCount <= 2)
+    .sort((a,b) => a.missingCount - b.missingCount);
 
-    setRecipes(enriched);
+    setRecipes(scored);
     setLoading(false);
   }
 
   return (
-    <div className="page">
-      <h1>Recipes</h1>
-      <div className="small">Recipes you can almost cook right now</div>
+    <div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+        <h1>Recipes</h1>
+        <Link href="/recipes/add" className="btn primary">+ Add recipe</Link>
+      </div>
 
       {loading ? (
-        <div className="card">Loading recipes…</div>
+        <div className="card skeleton" style={{ height:120 }} />
       ) : recipes.length === 0 ? (
         <div className="card small">
-          No recipes match your pantry yet. Add 1–2 items.
+          No recipes match your pantry yet. Add 1–2 more staples.
         </div>
       ) : (
-        <div className="grid">
+        <div style={{ display:'grid', gap:12 }}>
           {recipes.map(r => (
-            <div key={r.id} className="recipe-card">
-              <div>
-                <div className="recipe-title">{r.title}</div>
-                <div className="small">
-                  {r.cuisine} • {r.servings} servings
+            <div key={r.id} className="card">
+              <div style={{ display:'flex', justifyContent:'space-between' }}>
+                <div>
+                  <div style={{ fontWeight:700 }}>{r.title}</div>
+                  <div className="small">
+                    {r.cuisine} • {r.servings} servings
+                  </div>
                 </div>
-                <div className="badge">
-                  {r.haveCount}/{r.ingredients.length} ingredients
+                <div style={{ fontWeight:700, color: r.missingCount === 0 ? '#16a34a' : '#f59e0b' }}>
+                  {r.missingCount === 0 ? 'Ready to cook' : `Missing ${r.missingCount}`}
                 </div>
               </div>
 
-              <button
-                className="btn primary"
-                onClick={() => setActiveRecipe(r)}
-              >
-                Cook Now
-              </button>
+              {r.missingCount > 0 && (
+                <div className="small" style={{ marginTop:6 }}>
+                  Missing: {r.missing.map(m => m.name).join(', ')}
+                </div>
+              )}
+
+              <div style={{ marginTop:10 }}>
+                <Link href={`/recipes/${r.id}`} className="btn">
+                  View
+                </Link>
+              </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* MODAL */}
-      {activeRecipe && (
-        <div className="modal-backdrop" onClick={() => setActiveRecipe(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>{activeRecipe.title}</h2>
-            <div className="small">{activeRecipe.cuisine}</div>
-
-            <div style={{ marginTop: 12 }}>
-              {activeRecipe.ingredients.map((i, idx) => {
-                const have = inventory.some(n =>
-                  n.includes(i.name.toLowerCase())
-                );
-                return (
-                  <div
-                    key={idx}
-                    className={`ingredient ${have ? 'have' : 'missing'}`}
-                  >
-                    {have ? '✔' : '✖'} {i.name}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn" onClick={() => setActiveRecipe(null)}>
-                Close
-              </button>
-              <button className="btn primary">
-                Start Cooking
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
