@@ -152,3 +152,66 @@ h1 {
   0% { background-position: -200px 0; }
   100% { background-position: 200px 0; }
 }
+/* ===============================
+   Bottom Navigation (Mobile)
+   =============================== */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 420px;
+  height: 64px;
+
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(14px);
+
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+.bottom-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  text-decoration: none;
+  color: #9ca3af;
+
+  font-size: 11px;
+  transition: all 0.2s ease;
+}
+
+.bottom-tab .icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.bottom-tab.active {
+  color: #22c55e;
+}
+
+.bottom-tab.active .icon {
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
+}
+
+.bottom-tab .label {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Prevent content from hiding behind nav */
+.container {
+  padding-bottom: 100px;
+}
+
