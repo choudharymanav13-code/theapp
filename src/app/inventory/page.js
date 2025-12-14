@@ -1,62 +1,94 @@
-// src/app/inventory/page.js
 'use client';
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Link from 'next/link';
 
-export default function Inventory() {
+function daysLeft(date) {
+  const d = new Date(date);
+  const now = new Date();
+  return Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+}
+
+export default function InventoryPage() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    const { data, error } = await supabase
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  async function loadItems() {
+    setLoading(true);
+    const { data } = await supabase
       .from('items')
       .select('*')
-      .order('created_at', { ascending: false });
-    if (!error && data) setItems(data);
-  };
+      .order('expiry_date', { ascending: true });
 
-  useEffect(() => { load(); }, []);
+    setItems(data || []);
+    setLoading(false);
+  }
 
-  const remove = async (id) => {
-    await supabase.from('items').delete().eq('id', id);
-    load();
-  };
+  const useSoon = [];
+  const pantry = [];
+  const longLife = [];
 
-  const macrosLine = (it) => {
-    const kcal = it.calories_per_100g != null ? `${it.calories_per_100g} kcal/100g` : '— kcal';
-    const p = it.protein_100g != null ? `P ${+Number(it.protein_100g).toFixed(1)}g` : 'P —g';
-    const c = it.carbs_100g   != null ? `C ${+Number(it.carbs_100g).toFixed(1)}g`   : 'C —g';
-    const f = it.fat_100g     != null ? `F ${+Number(it.fat_100g).toFixed(1)}g`     : 'F —g';
-    return `${kcal} • ${p} ${c} ${f}`;
-  };
+  items.forEach(i => {
+    const d = daysLeft(i.expiry_date);
+    if (d <= 3) useSoon.push({ ...i, d });
+    else if (d <= 7) pantry.push({ ...i, d });
+    else longLife.push({ ...i, d });
+  });
+
+  function renderItem(i) {
+    return (
+      <div key={i.id} className={`inventory-card exp-${i.d <= 0 ? 'expired' : i.d <= 3 ? 'soon' : i.d <= 7 ? 'warn' : 'safe'}`}>
+        <div>
+          <div className="item-title">{i.name}</div>
+          <div className="small">
+            {i.quantity}{i.unit} • {i.calories_per_100g} kcal/100g
+          </div>
+          <div className="small">
+            Exp: {new Date(i.expiry_date).toLocaleDateString()}
+          </div>
+        </div>
+        <Link href="/add-item" className="btn">Edit</Link>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="header"><h1>Inventory</h1></div>
-      <div className="content">
-        <div className="row" style={{ gap: 8 }}>
-          <input className="input" placeholder="Search (e.g., dal, paneer) — coming soon" />
-          <a href="/add-item" className="btn">+ Add</a>
-        </div>
+    <div className="page">
+      <h1>Inventory</h1>
 
-        <div className="space"></div>
+      {loading ? (
+        <div className="card">Loading pantry…</div>
+      ) : items.length === 0 ? (
+        <div className="card small">Your pantry is empty.</div>
+      ) : (
+        <>
+          {useSoon.length > 0 && (
+            <>
+              <h3 className="section-title">⚠️ Use Soon</h3>
+              <div className="grid">{useSoon.map(renderItem)}</div>
+            </>
+          )}
 
-        <div className="list">
-          {items.map((it) => (
-            <div key={it.id} className="list-item">
-              <div>
-                <div className="item-title">
-                  {it.name} {it.brand ? <span className="badge" style={{ marginLeft: 6 }}>{it.brand}</span> : null}
-                </div>
-                <div className="item-sub">
-                  {it.quantity} {it.unit} • {macrosLine(it)} • Exp: {it.expiry_date}
-                </div>
-              </div>
-              <button className="btn danger" onClick={() => remove(it.id)}>Delete</button>
-            </div>
-          ))}
-          {items.length === 0 && <div className="small">No items yet. Add your first item →</div>}
-        </div>
-      </div>
-    </>
+          {pantry.length > 0 && (
+            <>
+              <h3 className="section-title">📦 Pantry</h3>
+              <div className="grid">{pantry.map(renderItem)}</div>
+            </>
+          )}
+
+          {longLife.length > 0 && (
+            <>
+              <h3 className="section-title">❄️ Long Life</h3>
+              <div className="grid">{longLife.map(renderItem)}</div>
+            </>
+          )}
+        </>
+      )}
+    </div>
   );
 }
