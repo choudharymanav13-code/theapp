@@ -21,15 +21,14 @@ export default function BottomNav() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // 🔒 Hide bottom nav if not logged in (login page)
   if (!session) return null;
 
   const tabs = [
-    { href: '/', label: 'Home', icon: '🏠' },
-    { href: '/inventory', label: 'Inventory', icon: '📦' },
-    { href: '/recipes', label: 'Recipes', icon: '📖' },
-    { href: '/log-meal', label: 'Log', icon: '🍽️' },
-    { href: '/profile', label: 'Profile', icon: '👤' },
+    { href: '/', label: 'Home', icon: 'home' },
+    { href: '/inventory', label: 'Inventory', icon: 'box' },
+    { href: '/recipes', label: 'Recipes', icon: 'book' },
+    { href: '/log-meal', label: 'Log', icon: 'meal' },
+    { href: '/profile', label: 'Profile', icon: 'user' },
   ];
 
   return (
@@ -42,8 +41,8 @@ export default function BottomNav() {
             href={tab.href}
             className={`bottom-tab ${active ? 'active' : ''}`}
           >
-            <span className="icon">{tab.icon}</span>
-            {active && <span className="label">{tab.label}</span>}
+            <span className={`icon icon-${tab.icon}`} />
+            <span className="label">{tab.label}</span>
           </Link>
         );
       })}
