@@ -338,3 +338,8 @@ h1 {
 .item-title {
   font-weight: 700;
 }
+.btn.danger {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+}
