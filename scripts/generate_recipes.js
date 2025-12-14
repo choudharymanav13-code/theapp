@@ -2,86 +2,89 @@
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Helper to create safe, unique IDs
- */
-function makeId(title, index) {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')   // replace spaces & symbols with -
-      .replace(/(^-|-$)/g, '')      // trim -
-    + '-' + index                   // ensure uniqueness
-  );
+/* ------------------ HELPERS ------------------ */
+const uid = (c, i) => `${c.toLowerCase()}-${i}`;
+
+const ING = {
+  flour: { name: 'Wheat Flour', unit: 'g' },
+  rice: { name: 'Rice', unit: 'g' },
+  potato: { name: 'Potato', unit: 'count' },
+  onion: { name: 'Onion', unit: 'count' },
+  tomato: { name: 'Tomato', unit: 'count' },
+  oil: { name: 'Oil', unit: 'ml' },
+  milk: { name: 'Milk', unit: 'ml' },
+  curd: { name: 'Curd', unit: 'g' },
+  paneer: { name: 'Paneer', unit: 'g' },
+  dal: { name: 'Toor Dal', unit: 'g' },
+  pasta: { name: 'Pasta', unit: 'g' },
+  bread: { name: 'Bread', unit: 'count' },
+  egg: { name: 'Egg', unit: 'count' }
+};
+
+function ing(key, qty) {
+  return { name: ING[key].name, qty, unit: ING[key].unit };
 }
 
-const RECIPES = [];
+/* ------------------ INDIAN RECIPES ------------------ */
+const INDIAN = [
+  ['Aloo Paratha', 2, 320, [ing('flour',200), ing('potato',2), ing('oil',15)]],
+  ['Dal Tadka', 3, 280, [ing('dal',150), ing('onion',1), ing('oil',10)]],
+  ['Paneer Bhurji', 2, 350, [ing('paneer',200), ing('onion',1), ing('oil',10)]],
+  ['Jeera Rice', 3, 240, [ing('rice',200), ing('oil',10)]],
+  ['Curd Rice', 2, 260, [ing('rice',150), ing('curd',100)]],
+];
 
-/* ---------------- INDIAN RECIPES ---------------- */
+const indianRecipes = [];
+for (let i = 0; i < 100; i++) {
+  const base = INDIAN[i % INDIAN.length];
+  indianRecipes.push({
+    id: uid('indian', i + 1),
+    title: base[0],
+    cuisine: 'Indian',
+    difficulty: i % 2 === 0 ? 'Easy' : 'Medium',
+    servings: base[1],
+    nutrition: { kcal: base[2] },
+    ingredients: base[3],
+    steps: [
+      'Prepare ingredients',
+      'Cook according to recipe',
+      'Serve hot'
+    ]
+  });
+}
 
-RECIPES.push({
-  title: 'Aloo Paratha',
-  cuisine: 'Indian',
-  servings: 2,
-  ingredients: [
-    { name: 'Wheat Flour', qty: 200, unit: 'g' },
-    { name: 'Potato', qty: 2, unit: 'count' },
-    { name: 'Oil', qty: 10, unit: 'ml' }
-  ],
-  steps: [
-    'Boil and mash potatoes',
-    'Mix potatoes with spices',
-    'Prepare dough with flour',
-    'Stuff, roll, and cook on tawa'
-  ],
-  nutrition: { kcal: 350, protein: 8, carbs: 60, fat: 10 }
-});
+/* ------------------ GLOBAL RECIPES ------------------ */
+const GLOBAL = [
+  ['Pasta Alfredo', 2, 420, [ing('pasta',200), ing('milk',100)]],
+  ['Omelette', 1, 250, [ing('egg',2), ing('oil',5)]],
+  ['Grilled Sandwich', 1, 300, [ing('bread',2), ing('oil',5)]],
+  ['Tomato Soup', 2, 180, [ing('tomato',3)]],
+];
 
-RECIPES.push({
-  title: 'Boondi Raita',
-  cuisine: 'Indian',
-  servings: 2,
-  ingredients: [
-    { name: 'Curd', qty: 200, unit: 'g' },
-    { name: 'Boondi', qty: 50, unit: 'g' }
-  ],
-  steps: [
-    'Whisk curd',
-    'Add soaked boondi',
-    'Season and serve'
-  ],
-  nutrition: { kcal: 180, protein: 6, carbs: 12, fat: 8 }
-});
+const globalRecipes = [];
+for (let i = 0; i < 50; i++) {
+  const base = GLOBAL[i % GLOBAL.length];
+  globalRecipes.push({
+    id: uid('global', i + 1),
+    title: base[0],
+    cuisine: 'Global',
+    difficulty: i % 2 === 0 ? 'Easy' : 'Medium',
+    servings: base[1],
+    nutrition: { kcal: base[2] },
+    ingredients: base[3],
+    steps: [
+      'Prep ingredients',
+      'Cook as instructed',
+      'Serve warm'
+    ]
+  });
+}
 
-/* ---------------- GLOBAL RECIPES ---------------- */
+/* ------------------ WRITE FILE ------------------ */
+const ALL = [...indianRecipes, ...globalRecipes];
 
-RECIPES.push({
-  title: 'Scrambled Eggs',
-  cuisine: 'Global',
-  servings: 1,
-  ingredients: [
-    { name: 'Eggs', qty: 2, unit: 'count' },
-    { name: 'Butter', qty: 5, unit: 'g' }
-  ],
-  steps: [
-    'Beat eggs',
-    'Cook gently in butter',
-    'Season and serve'
-  ],
-  nutrition: { kcal: 220, protein: 12, carbs: 2, fat: 18 }
-});
+const outPath = path.join(process.cwd(), 'src', 'data', 'recipes.json');
+fs.writeFileSync(outPath, JSON.stringify(ALL, null, 2));
 
-/* ---------------- ID ASSIGNMENT (CRITICAL FIX) ---------------- */
-
-const FINAL_RECIPES = RECIPES.map((recipe, index) => ({
-  ...recipe,
-  id: makeId(recipe.title, index)
-}));
-
-/* ---------------- WRITE FILE ---------------- */
-
-const outPath = path.join(__dirname, '../src/data/recipes.json');
-fs.writeFileSync(outPath, JSON.stringify(FINAL_RECIPES, null, 2));
-
-console.log(`✅ ${FINAL_RECIPES.length} recipes written with unique IDs`);
+console.log(`✅ ${ALL.length} recipes written`);
 console.log(`📁 ${outPath}`);
